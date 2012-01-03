@@ -30,7 +30,6 @@ Ttt::Ttt() {
         int linescale = 0;
 
         //csteps=100;
-        my_writer = new NGC_Writer(0.003, false);
 
         error = FT_Init_FreeType(&library);
         if(error) handle_ft_error("FT_Init_FreeType" , error, __LINE__);
@@ -45,6 +44,8 @@ Ttt::Ttt() {
         if (unicode) setlocale(LC_CTYPE, "");
         
         std::string str="Hello world.";
+
+        my_writer = new NGC_Writer(ttfont, str, (unicode==1), 0.003, false);
 
         int l = str.length();
         
@@ -62,6 +63,7 @@ Ttt::Ttt() {
             if(r==-1) { s++; continue; }
             
             // g-code start-of-glyph comments
+            my_writer->start_glyph(s,wc, offset);
             
             glyph_extents.reset();
             offset += render_char(face, wc, offset, linescale);
@@ -69,10 +71,10 @@ Ttt::Ttt() {
             s += r; l -= r;
             
             // g-code glyph extents comments
-
+            my_writer->end_glyph(glyph_extents, advance);
+            
         }
         
-        // post-amble
         my_writer->postamble(offset, line_extents);
 }
 
@@ -152,8 +154,9 @@ int Ttt::my_conic_to( const FT_Vector* control, const FT_Vector* to, void* user 
     P to_pt(to);
     P ctrl_pt(control);
     P last_pt(&last_point);
-    P diff( ctrl_pt-last_pt );
+    P diff =  ctrl_pt-last_pt ;
     my_writer->conic_to( to_pt, diff );
+    last_point = *to;
     return 0;
 // OR, for dxf, calculate polyline
 /*
@@ -277,14 +280,14 @@ void Ttt::arc(P p1, P p2, P d) {
     d.unit();
     P p = p2-p1; //sub(p2, p1);
     double den = 2 * (p.y*d.x - p.x*d.y);
-
     if(fabs(den) < 1e-10) { // does this happen for DXF?
         //printf("G1 X[%.4f*#3+#5] Y[%.4f*#3+#6]\n", p2.x, p2.y);
+        my_writer->arc_small_den(p2);
         return;
     }
 
     double r = - p.dot(p)/den;
-    double i = d.y*r;
+    double i =  d.y*r;
     double j = -d.x*r;
 
     P c(p1.x+i, p1.y+j );
@@ -296,23 +299,10 @@ void Ttt::arc(P p1, P p2, P d) {
     else
         while(en >= st) en -= 2*M_PI;
 
-/*
-#ifdef DXF
     double bulge = tan(fabs(en-st)/4);
     if(r > 0) bulge = -bulge;
-        printf("  42\n%.4f\n  70\n1\n"
-           "  0\nVERTEX\n  8\n0\n  10\n%.4f\n  20\n%.4f\n  30\n0.0\n",
-           bulge, p2.x, p2.y);
-#else
     double gr = (en - st) < M_PI ? fabs(r) : -fabs(r);
-    if(r < 0)
-        printf("G3 X[%.4f*#3+#5] Y[%.4f*#3+#6] R[%.4f*#3]\n",
-            p2.x, p2.y, gr);
-    else
-        printf("G2 X[%.4f*#3+#5] Y[%.4f*#3+#6] R[%.4f*#3]\n",
-            p2.x, p2.y, gr);
-#endif
-*/
+    my_writer->arc(p2, r, gr, bulge);
 }
 
 void Ttt::biarc(P p0, P ts, P p4, P te, double r) {
@@ -354,18 +344,19 @@ void Ttt::biarc(P p0, P ts, P p4, P te, double r) {
 }
 
 void Ttt::my_draw_bitmap(FT_Bitmap *b, FT_Int x, FT_Int y, int linescale) {
-    FT_Int i, j;
+    // FT_Int i, j;
     static int oldbit; // ?
     FT_Vector oldv = {99999,0};
     FT_Vector vbuf[100]; //freetype says no more than 32 ever?
     int spans = 0;
     int pitch = abs(b->pitch);
-    static int odd=0;
-    for(j = 0; j < b->rows; j++) {
+    static int odd=0; //?
+    
+    for(FT_Int j = 0; j < b->rows; j++) {
         FT_Vector v;
         oldbit = 0;
         spans = 0;
-        for(i = 0; i < pitch; i++) {
+        for(FT_Int i = 0; i < pitch; i++) {
             unsigned char byte = b->buffer[j * pitch + i], mask, bits;
             for(bits = 0, mask = 0x80; mask; bits++, mask >>= 1) {
                 unsigned char bit = byte & mask;
@@ -392,12 +383,12 @@ void Ttt::my_draw_bitmap(FT_Bitmap *b, FT_Int x, FT_Int y, int linescale) {
         odd = !odd;
         spans /= 2;
         if(odd) {
-            for (int i=spans-1; i>=0; i--) {
+            for (FT_Int i=spans-1; i>=0; i--) {
                 my_move_to(vbuf+1+(i*2), (void*)1);
                 my_line_to(vbuf+(i*2), (void*)1);
             }
         } else {
-            for (int i=0; i<spans; i++) {
+            for (FT_Int i=0; i<spans; i++) {
                 my_move_to(vbuf+(i*2), (void*)1);
                 my_line_to(vbuf+1+(i*2), (void*)1);
             }

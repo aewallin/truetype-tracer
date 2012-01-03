@@ -4,9 +4,24 @@
 
 class NGC_Writer : public Writer {
 public:
-    NGC_Writer(double scale, bool blockdelete = false ) : scale(scale), bd(blockdelete) {}
+    NGC_Writer(std::string font, std::string text, bool unicode, double scale, bool blockdelete = false ) 
+        : ttfont(font), text(text), unicode(unicode), scale(scale), bd(blockdelete) {}
     
     virtual void preamble() {
+        std::cout << "(font: "<< ttfont <<")\n"; //,ttfont);
+        
+        if(!unicode) {
+            std::cout << "(text: ";
+            const char* s = text.data();
+            int l = text.length();
+            for (int i=0; i<l; i++)
+                if(isalnum(s[i]))
+                    std::cout << s[i];
+                else
+                    std::cout << "*";
+            std::cout << ")\n";
+        }
+        
         std::cout << "#1=0.1    (SafeHeight)\n";
         std::cout << "#2=0.01   (Depth of Cut)\n";
         std::cout << "#3="<< scale << " (XY Scale)\n"; //, scale); // scale used here!
@@ -24,6 +39,22 @@ public:
             std::cout << line_extents.maxy << ")\n"; //, line_extents.minx, , line_extents.miny, line_extents.maxy);
         }
         std::cout << "G00 Z #1\nM02\n";
+    }
+    virtual void start_glyph(const char* s,wchar_t wc, long int offset) {
+        if(isalnum(*s))
+            printf("(start of symbol %c)\n", wc);
+        else
+            printf("(start of symbol 0x%02X)\n", wc);
+        
+        /* comment with offset info */
+        printf("(starting X offset: %ld)\n", offset);
+    }
+    virtual void end_glyph(extents glyph_extents, FT_Vector advance) {
+        if ( glyph_extents.maxx > glyph_extents.minx ) {
+            printf( "(symbol extents: X = %ld to %ld, Y = %ld to %ld)\n",
+            glyph_extents.minx, glyph_extents.maxx, glyph_extents.miny, glyph_extents.maxy );
+        }
+        printf ( "(symbol advance: X = %ld, Y = %ld)\n", advance.x, advance.y );
     }
     virtual void move_to(P p) {
         //if (debug) printf("(moveto %ld,%ld)\n", to->x, to->y);
@@ -44,21 +75,29 @@ public:
         std::cout << "G01 X [" << p.x << "*#3+#5] Y [" << p.y << "*#3+#6] (lineto)\n"; //, blockdelete, to->x, to->y);
     }
     virtual void conic_to(P to, P diff ) {
-        //printf("G5.1 X[%ld*#3+#5] Y[%ld*#3+#6] I[%ld*#3] J[%ld*#3]\n", to->x, to->y, control->x - last_point.x, control->y - last_point.y);
-        std::cout << "G5.1 X[" << to.x << "*#3+#5] Y[" << to.y << "*#3+#6] I["<< diff.x <<"*#3] J[" << diff.y <<"*#3]\n";
-        //, to->x, to->y, control->x - last_point.x, control->y - last_point.y)
+        std::cout << "G5.1 X[" << to.x << "*#3+#5] Y[" << to.y << "*#3+#6] I["<< diff.x <<"*#3] J[" << diff.y <<"*#3] (conic_to)\n";
     }
     virtual void cubic_to(P ctrl1, P ctrl2, P to ) {
-        // printf("G5.2 X[%ld*#3+#5] Y[%ld*#3+#6] L4 P1\n", control1->x, control1->y);
-        // printf("X[%ld*#3+#5] Y[%ld*#3+#6] P1\n", control2->x, control2->y);
-        // printf("X[%ld*#3+#5] Y[%ld*#3+#6] P1\n", to->x, to->y);
-        // printf("G5.3\n");
         std::cout << "G5.2 X[" << ctrl1.x << "*#3+#5] Y[" << ctrl1.y << "*#3+#6] L4 P1\n";
         std::cout << "X[" << ctrl2.x << "*#3+#5] Y[" << ctrl2.y << "*#3+#6] P1\n"; //, control2->x, control2->y
         std::cout << "X[" << to.x << "*#3+#5] Y[" << to.y << "*#3+#6] P1\n";
         std::cout << "G5.3\n";
     }
+    virtual void arc_small_den(P p2) {
+        std::cout << "G1 X["<< p2.x <<"*#3+#5] Y["<< p2.y<<"%.4f*#3+#6]\n"; //, p2.x, p2.y);
+    }
+    virtual void arc(P p2, double r, double gr, double bulge) {
+        if(r < 0)
+            std::cout << "G3 X[" << p2.x << "*#3+#5] Y["<< p2.y  << "*#3+#6] R["<< gr <<"*#3]\n";
+        else
+            std::cout << "G2 X[" << p2.x << "*#3+#5] Y["<< p2.y  << "*#3+#6] R["<< gr <<"*#3]\n";
+
+    } 
 private:
+    
     double scale;
     bool bd; // blockdelete
+    std::string ttfont;
+    std::string text;
+    bool unicode;
 };
