@@ -1,6 +1,6 @@
 // experimental c++ port of truetype-tracer
 // January 2012, anders.e.e.wallin "at" gmail.com
-    
+
 #pragma once
 
 #include <string>

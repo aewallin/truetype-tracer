@@ -1,0 +1,30 @@
+/*
+This file is part of TTT.  TTT is free software; you can redistribute
+it and/or modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2 of the
+License, or (at your option) any later version.  TTT is distributed in
+the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+PURPOSE.  See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with TTT; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+Copyright © 2004, 2005, 2006, 2007, 2008 Chris Radek <chris@timeguy.com>
+
+This source gets compiled into 2 executables. The first, ttt generates
+G-code from a true type font and a text string. The second executable
+is ttt_dxf which generates an autocad dxf file from a true type font
+and a text string.
+
+example commandline:
+ttt "Hello World" > hw.ngc
+ttt_dxf "Hello World" > hw.dxf
+
+MANY THANKS go to Lawrence Glaister <ve7it@shaw.ca> for updates based
+on the new FreeType FT_Outline API and .pfb support!
+
+C++ port and python bindings by Anders Wallin 
+(anders.e.e.wallin "at" gmail.com)
+January 2012.
+*/
