@@ -3,6 +3,7 @@
     
 #include "ttt.hpp"
 #include "p.hpp"
+#include "ngc_writer.hpp"
 
 void handle_ft_error(std::string where, int f, int x) {
     const struct ftError *e = &ft_errors[0];
@@ -129,25 +130,20 @@ long int Ttt::render_char(FT_Face face, wchar_t c, long int offset, int linescal
     return face->glyph->advance.x;
 }
 
-// plot with pen down to point
+// move with 'pen up' to a new position and then put 'pen down' 
 int Ttt::my_move_to( const FT_Vector* to, void* user ) {
-    
-    // DXF / G-code output here
     P pt(to);
     my_writer->move_to( pt );
-    
     last_point = *to;
     glyph_extents.add_point( *to);
-    //std::cout << " move to ";
     return 0;
 }
+
 int Ttt::my_line_to( const FT_Vector* to, void* user ) {
-    
-    // DXF / G-code output here
-    
+    P p(to);
+    my_writer->line_to(p);
     last_point = *to;
     glyph_extents.add_point( *to);
-
     return 0;
 }
 
@@ -205,18 +201,6 @@ int Ttt::my_conic_to( const FT_Vector* control, const FT_Vector* to, void* user 
 
 int Ttt::my_cubic_to(const FT_Vector* control1, const FT_Vector* control2, const FT_Vector *to, void* user) {
 
-    //double x,y;
-
-
-/*
-#ifndef DXF
-    printf("G5.2 X[%ld*#3+#5] Y[%ld*#3+#6] L4 P1\n", control1->x, control1->y);
-    printf("X[%ld*#3+#5] Y[%ld*#3+#6] P1\n", control2->x, control2->y);
-    printf("X[%ld*#3+#5] Y[%ld*#3+#6] P1\n", to->x, to->y);
-    printf("G5.3\n");
-    return 0;
-#endif
-*/
     P ctrl1(control1);
     P ctrl2(control2);
     P to_pt(to);
@@ -286,13 +270,7 @@ int Ttt::my_cubic_to(const FT_Vector* control1, const FT_Vector* control2, const
 
 void Ttt::line(P p) {
     my_writer->line(p);
-    /*
-#ifdef DXF
-    printf("  0\nVERTEX\n  8\n0\n 10\n%.4f\n 20\n%.4f\n 30\n0.0\n", p.x, p.y);
-#else
-    printf("G01 X [%.4f*#3+#5] Y [%.4f*#3+#6] (lineto)\n",  p.x, p.y);
-#endif
-*/
+
 }
 
 void Ttt::arc(P p1, P p2, P d) {
@@ -300,7 +278,7 @@ void Ttt::arc(P p1, P p2, P d) {
     P p = p2-p1; //sub(p2, p1);
     double den = 2 * (p.y*d.x - p.x*d.y);
 
-    if(fabs(den) < 1e-10) {
+    if(fabs(den) < 1e-10) { // does this happen for DXF?
         //printf("G1 X[%.4f*#3+#5] Y[%.4f*#3+#6]\n", p2.x, p2.y);
         return;
     }
