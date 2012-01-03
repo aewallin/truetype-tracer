@@ -4,7 +4,7 @@
 
 class DXF_Writer : public Writer {
 public:
-    DXF_Writer(double scale, bool blockdelete = false ) : scale(scale), bd(blockdelete) {}
+    DXF_Writer()   {}
     
     virtual void preamble() {
         printf("  0\nSECTION\n  2\nENTITIES\n");
@@ -25,7 +25,7 @@ public:
         //printf("  0\nVERTEX\n  8\n0\n 10\n%.4f\n 20\n%.4f\n 30\n0.0\n", p.x, p.y);
     }
     virtual void line_to(P p) {
-        printf("  0\nVERTEX\n  8\n0\n 10\n%ld.000\n 20\n%ld.000\n 30\n0.0\n", to->x,to->y);
+        //printf("  0\nVERTEX\n  8\n0\n 10\n%ld.000\n 20\n%ld.000\n 30\n0.0\n", p.x,p.y);
     }
     virtual void conic_to(P to, P diff ) {
         //
@@ -39,6 +39,5 @@ public:
         //  bulge, p2.x, p2.y);
     }
 private:
-    double scale;
-    bool bd; // blockdelete
+
 };

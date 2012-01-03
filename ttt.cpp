@@ -23,51 +23,48 @@ Ttt::Ttt(Writer* wr,
          int unicode ,
          std::string ttfont ) 
 {
-        self = this; // so that static methods work..
-        int error;
-        //int unicode = 0;
-        int linescale = 0;
+    self = this; // so that static methods work..
+    int error;
+    int linescale = 0;
 
-        error = FT_Init_FreeType(&library);
-        if(error) handle_ft_error("FT_Init_FreeType" , error, __LINE__);
+    error = FT_Init_FreeType(&library);
+    if(error) handle_ft_error("FT_Init_FreeType" , error, __LINE__);
 
-        error = FT_New_Face(library, ttfont.data() , 0, &face);
-        if(error) handle_ft_error("FT_New_Face", error, __LINE__);
-        
-        #define MYFSIZE 64
-        error = FT_Set_Pixel_Sizes(face, 0, MYFSIZE);     
-        if (error) handle_ft_error("FT_Set_Pixel_Sizes", error, __LINE__);
+    error = FT_New_Face(library, ttfont.data() , 0, &face);
+    if(error) handle_ft_error("FT_New_Face", error, __LINE__);
+    
+    #define MYFSIZE 64
+    error = FT_Set_Pixel_Sizes(face, 0, MYFSIZE);     
+    if (error) handle_ft_error("FT_Set_Pixel_Sizes", error, __LINE__);
 
-        if (unicode) setlocale(LC_CTYPE, "");
-        
-        
-        my_writer = wr; //
-        
-        // this redirects to the buffer
-        cout_redirect redir( buffer.rdbuf() );
-        
-        int l = str.length();
-        
-        my_writer->preamble();
-        
-        line_extents.reset();
-        long int offset = 0;
-        
-        const char* s = str.data();
-        
-        while(*s ) { // loop through characters
-            wchar_t wc;
-            int r = mbtowc(&wc, s, l); // convert multibyte s, store in wc. return number of converted bytes
-            if(r==-1) { s++; continue; }
-            my_writer->start_glyph(s,wc, offset);
-            glyph_extents.reset();
-            offset += render_char(face, wc, offset, linescale);
-            line_extents.add_extents(glyph_extents);
-            s += r; l -= r;
-            my_writer->end_glyph(glyph_extents, advance);
-        }
-        
-        my_writer->postamble(offset, line_extents);
+    if (unicode) setlocale(LC_CTYPE, "");
+    
+    
+    my_writer = wr; //
+    
+    // this redirects to the buffer
+    cout_redirect redir( buffer.rdbuf() );
+    
+    int l = str.length();
+    
+    my_writer->preamble();
+    
+    line_extents.reset();
+    long int offset = 0;
+    const char* s = str.data();    
+    while(*s ) { // loop through characters
+        wchar_t wc;
+        int r = mbtowc(&wc, s, l); // convert multibyte s, store in wc. return number of converted bytes
+        if(r==-1) { s++; continue; }
+        my_writer->start_glyph(s,wc, offset);
+        glyph_extents.reset();
+        offset += render_char(face, wc, offset, linescale);
+        line_extents.add_extents(glyph_extents);
+        s += r; l -= r;
+        my_writer->end_glyph(glyph_extents, advance);
+    }
+    
+    my_writer->postamble(offset, line_extents);
 }
 
 // lookup glyph and extract all the shapes required to draw the outline

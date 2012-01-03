@@ -28,9 +28,6 @@ const struct ftError {
 } ft_errors[] =
 #include FT_ERRORS_H
 
-// this is the default font used if not specified on commandline
-#define TTFONT "/usr/share/fonts/truetype/freefont/FreeSerifBoldItalic.ttf"
-
 // routine to print out hopefully-useful error messages
 void handle_ft_error(std::string where, int f, int x);
 
@@ -38,7 +35,7 @@ void handle_ft_error(std::string where, int f, int x);
 #define SQ(a) ((a)*(a))
 #define CUBE(a) ((a)*(a)*(a))
 
-
+// this redirects std::cout to a buffer which we can later output to python
 struct cout_redirect {
     cout_redirect( std::streambuf* new_buffer ) 
         : old( std::cout.rdbuf( new_buffer ) )
@@ -46,7 +43,6 @@ struct cout_redirect {
     ~cout_redirect( ) {
         std::cout.rdbuf( old );
     }
-
 private:
     std::streambuf * old;
 };
@@ -54,9 +50,9 @@ private:
 class Ttt {
 public:
     Ttt( Writer* wr, 
-         std::string str="Hello world.",
-         int unicode = 0,
-         std::string ttfont = TTFONT) ;
+         std::string str,
+         int unicode ,
+         std::string ttfont ) ;
          
     std::string get_output() {
         return buffer.str();
@@ -111,9 +107,7 @@ private:
         else
             return self->my_cubic_as_biarcs(control1,control2,to,user);
     }
-    
-
-    
+        
     FT_Library library;
     FT_Face face;
     extents line_extents;

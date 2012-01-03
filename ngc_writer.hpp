@@ -11,7 +11,7 @@ public:
     virtual bool has_cubic() {return true;}
     
     virtual void preamble() {
-        std::cout << "(font: "<< ttfont <<")\n"; //,ttfont);
+        std::cout << "(font: "<< ttfont <<")\n"; 
         
         if(!unicode) {
             std::cout << "(text: ";
@@ -27,30 +27,28 @@ public:
         
         std::cout << "#1=0.1    (SafeHeight)\n";
         std::cout << "#2=0.01   (Depth of Cut)\n";
-        std::cout << "#3="<< scale << " (XY Scale)\n"; //, scale); // scale used here!
+        std::cout << "#3="<< scale << " (XY Scale)\n"; 
         std::cout << "#4=10.0   (Feed)\n";
         std::cout << "#5=0.0    (X offset)\n";
-        std::cout << "#6=0.0    (Y offset)\n";
-    
-        //std::cout << " (g-code preamble)\n";
+        std::cout << "#6=0.0    (Y offset)\n";    
     }
     virtual void postamble(long int offset, extents line_extents) {
-        std::cout << "(final X offset: "<< offset << ")\n"; //, offset);
+        std::cout << "(final X offset: "<< offset << ")\n"; 
         if ( line_extents.maxx > line_extents.minx ) {
             std::cout << "(overall extents: X = "<< line_extents.minx <<" to ";
             std::cout << line_extents.maxx << ", Y = " << line_extents.miny << "  to ";
-            std::cout << line_extents.maxy << ")\n"; //, line_extents.minx, , line_extents.miny, line_extents.maxy);
+            std::cout << line_extents.maxy << ")\n"; 
         }
         std::cout << "G00 Z #1\nM02\n";
     }
     virtual void start_glyph(const char* s,wchar_t wc, long int offset) {
         if(isalnum(*s))
-            std::cout << "(start of symbol " << (char)wc << ")\n"; //, wc);
+            std::cout << "(start of symbol " << (char)wc << ")\n"; 
         else
-            std::cout << "(start of symbol 0x"<< std::hex << wc << std::dec <<")\n"; //, wc);
+            std::cout << "(start of symbol 0x"<< std::hex << wc << std::dec <<")\n"; 
         
         /* comment with offset info */
-        std::cout << "(starting X offset: "<< offset << ")\n"; //, offset);
+        std::cout << "(starting X offset: "<< offset << ")\n"; 
     }
     virtual void end_glyph(extents glyph_extents, FT_Vector advance) {
         if ( glyph_extents.maxx > glyph_extents.minx ) {
@@ -96,8 +94,7 @@ public:
             std::cout << "G3 X[" << p2.x << "*#3+#5] Y["<< p2.y  << "*#3+#6] R["<< gr <<"*#3]\n";
         else
             std::cout << "G2 X[" << p2.x << "*#3+#5] Y["<< p2.y  << "*#3+#6] R["<< gr <<"*#3]\n";
-
-    } 
+    }
 private:
     
     double scale;
@@ -105,5 +102,4 @@ private:
     std::string ttfont;
     std::string text;
     bool unicode;
-    std::ostringstream stream;
 };
