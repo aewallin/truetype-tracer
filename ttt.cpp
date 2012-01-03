@@ -1,6 +1,6 @@
 // experimental c++ port of truetype-tracer
 // January 2012, anders.e.e.wallin "at" gmail.com
-    
+
 #include "ttt.hpp"
 #include "p.hpp"
 #include "ngc_writer.hpp"
@@ -18,18 +18,15 @@ void handle_ft_error(std::string where, int f, int x) {
 
 Ttt* Ttt::self = NULL;
 
-Ttt::Ttt() {
-        self = this;
+Ttt::Ttt(Writer* wr, 
+         std::string str,
+         int unicode ,
+         std::string ttfont ) 
+{
+        self = this; // so that static methods work..
         int error;
-        //int i, l;
-        //long int offset;
-        int unicode = 0;
-        //char *s;
-        std::string ttfont = TTFONT;
-        //double scale = 0.0003;
+        //int unicode = 0;
         int linescale = 0;
-
-        //csteps=100;
 
         error = FT_Init_FreeType(&library);
         if(error) handle_ft_error("FT_Init_FreeType" , error, __LINE__);
@@ -43,36 +40,31 @@ Ttt::Ttt() {
 
         if (unicode) setlocale(LC_CTYPE, "");
         
-        std::string str="Hello world.";
-
-        my_writer = new NGC_Writer(ttfont, str, (unicode==1), 0.003, false);
-
+        
+        my_writer = wr; //
+        
+        // this redirects to the buffer
+        cout_redirect redir( buffer.rdbuf() );
+        
         int l = str.length();
         
-        //  preamble
         my_writer->preamble();
         
         line_extents.reset();
         long int offset = 0;
         
         const char* s = str.data();
-        // loop through characters
-        while(*s ) {
+        
+        while(*s ) { // loop through characters
             wchar_t wc;
             int r = mbtowc(&wc, s, l); // convert multibyte s, store in wc. return number of converted bytes
             if(r==-1) { s++; continue; }
-            
-            // g-code start-of-glyph comments
             my_writer->start_glyph(s,wc, offset);
-            
             glyph_extents.reset();
             offset += render_char(face, wc, offset, linescale);
             line_extents.add_extents(glyph_extents);
             s += r; l -= r;
-            
-            // g-code glyph extents comments
             my_writer->end_glyph(glyph_extents, advance);
-            
         }
         
         my_writer->postamble(offset, line_extents);
@@ -150,7 +142,6 @@ int Ttt::my_line_to( const FT_Vector* to, void* user ) {
 }
 
 int Ttt::my_conic_to( const FT_Vector* control, const FT_Vector* to, void* user ) {
-    // G5.1 output here
     P to_pt(to);
     P ctrl_pt(control);
     P last_pt(&last_point);
@@ -158,20 +149,19 @@ int Ttt::my_conic_to( const FT_Vector* control, const FT_Vector* to, void* user 
     my_writer->conic_to( to_pt, diff );
     last_point = *to;
     return 0;
-// OR, for dxf, calculate polyline
-/*
+}
+
+// dispatch here if writer does not have native conics
+int Ttt::my_conic_as_biarcs( const FT_Vector* control, const FT_Vector* to, void* user ) {
     int t;
-    double x,y;
     FT_Vector point=last_point;
     double len=0;
-    int csteps = 10; // ??
-    double dsteps = 1; // ??
-    //double l[csteps+1];
-    //l[0] = 0;
-    for(t=1; t<=csteps; t++) {
+    int csteps = 10; 
+    double dsteps = 200; 
+    for(int t=1; t<=csteps; t++) {
         double tf = (double)t/(double)csteps;
-        x = SQ(1-tf) * last_point.x + 2*tf*(1-tf) * control->x + SQ(tf) * to->x;
-        y = SQ(1-tf) * last_point.y + 2*tf*(1-tf) * control->y + SQ(tf) * to->y;
+        double x = SQ(1-tf) * last_point.x + 2*tf*(1-tf) * control->x + SQ(tf) * to->x;
+        double y = SQ(1-tf) * last_point.y + 2*tf*(1-tf) * control->y + SQ(tf) * to->y;
         len += hypot(x-point.x, y-point.y);
         point.x = x;
         point.y = y;
@@ -185,38 +175,46 @@ int Ttt::my_conic_to( const FT_Vector* control, const FT_Vector* to, void* user 
     P q1=p2 - p1;
     P ps=p0;
     P ts=q0;
-    int steps = (int) std::max( (double)2, len/dsteps);
+    int steps = (int) std::max( (double)2, (double)len/(double)dsteps);
     for(t=1; t<=steps; t++) {
         double tf = (double)t/(double)steps;
         double t1 = 1-tf;
-        //P p = add3(scale(p0, SQ(t1)), scale(p1, 2*tf*t1), scale(p2, SQ(tf)));
-        P p = p0.scale(SQ(t1)) + p1.scale(2*tf*t1) + p2.scale(SQ(tf));
-        //P t = add(scale(q0, t1), scale(q1, tf));
-        P t = q0.scale(t1) + q1.scale(tf); //add(scale(q0, t1), scale(q1, tf));
-        biarc(ps, ts, p, t, 1.0); // DXF?
+        P p = p0*SQ(t1) + p1*(2*tf*t1) + p2*SQ(tf);
+        P t = q0*(t1) + q1*(tf); 
+        biarc(ps, ts, p, t, 1.0); 
         ps = p; ts = t;
     }
 
     last_point = *to;
     return 0;
-    */
 }
 
 int Ttt::my_cubic_to(const FT_Vector* control1, const FT_Vector* control2, const FT_Vector *to, void* user) {
-
     P ctrl1(control1);
     P ctrl2(control2);
     P to_pt(to);
     my_writer->cubic_to( ctrl1, ctrl2, to_pt );
+    last_point = *to;
+    return 0;
+}
 
-/*
+// dispatch to this func if writer doesn't have native cubics
+int Ttt::my_cubic_as_biarcs(const FT_Vector* control1, 
+                           const FT_Vector* control2, 
+                           const FT_Vector *to, void* user) {
     FT_Vector point=last_point;
     double len=0;
     
-    int csteps = 10;
-    double dsteps = 0.1;
-// OR dxf-output
-    for(int t=1; t<=csteps; t++) {
+    // define the number of linear segments we use to approximate beziers
+    // in the gcode and the number of polyline control points for dxf code.
+    int csteps=10;
+
+    // define the subdivision of curves into arcs: approximate curve length
+    // in font coordinates to get one arc pair (minimum of two arc pairs
+    // per curve)
+    double dsteps=200;
+
+    for(int t=1; t<=csteps; t++) { // t in [0, 1]
         double tf = (double)t/(double)csteps;
         int x = CUBE(1-tf)*last_point.x     + 
             SQ(1-tf)*3*tf*control1->x   +
@@ -226,27 +224,18 @@ int Ttt::my_cubic_to(const FT_Vector* control1, const FT_Vector* control2, const
             SQ(1-tf)*3*tf*control1->y   +
             SQ(tf)*(1-tf)*3*control2->y +
             CUBE(tf)*to->y;
-        len += hypot(x-point.x, y-point.y);
+        len += hypot(x-point.x, y-point.y); // calculate total length of cubic
         point.x = x;
         point.y = y;
-        glyph_extents.add_point(point);
+        glyph_extents.add_point(point); // GLOBAL!! this only adds to the glyph_extents?
     }
 
-    int steps = (int) std::max( (double)2, len/dsteps);
-*/
+    int steps = (int) std::max( (double)2, len/dsteps); // at least two steps
 
-    /*   // g-code comment
-#ifndef DXF // we NEVER get here ??
-    printf(";cubicto %ld,%ld %ld,%ld %ld,%ld) ", control1->x, control1->y, control2->x, control2->y, to->x, to->y);
-    printf("len=%f steps=%d\n", len, steps);
-#endif
-* */
-
-/*
     P p0(&last_point);
     P p1(control1);
     P p2(control2);
-    P p3=(to);
+    P p3(to);
     P q0=p1-p0;
     P q1=p2-p1;
     P q2=p3-p2;
@@ -255,33 +244,26 @@ int Ttt::my_cubic_to(const FT_Vector* control1, const FT_Vector* control2, const
     for(int t=1; t<=steps; t++) {
         double tf = t*1.0/steps;
         double t1 = 1-tf;
-        //P p = add4(
-        //    scale(p0, CUBE(t1)), scale(p1, 3*tf*SQ(t1)),
-        //    scale(p2, 3*SQ(tf)*t1), scale(p3, CUBE(tf)));
         P p = p0*CUBE(t1) + p1*3*tf*SQ(t1) + p2*3*SQ(tf)*t1 + p3*CUBE(tf) ;
-        //P t = add3(scale(q0, SQ(t1)), scale(q1, 2*tf*t1), scale(q2, SQ(tf)));
         P t = q0*SQ(t1) + q1*2*tf*t1 + q2*SQ(tf);
-        biarc(ps, ts, p, t, 1.0);
-        ps = p; ts = t;
+        biarc(ps, ts, p, t, 1.0); // output many biarcs instead.
+        ps = p; 
+        ts = t;
     }
-
-    last_point = *to;
-
+    last_point = *to;  // GLOBAL!!
     return 0;
-    */
 }
+
 
 void Ttt::line(P p) {
     my_writer->line(p);
-
 }
 
 void Ttt::arc(P p1, P p2, P d) {
     d.unit();
-    P p = p2-p1; //sub(p2, p1);
+    P p = p2-p1;
     double den = 2 * (p.y*d.x - p.x*d.y);
     if(fabs(den) < 1e-10) { // does this happen for DXF?
-        //printf("G1 X[%.4f*#3+#5] Y[%.4f*#3+#6]\n", p2.x, p2.y);
         my_writer->arc_small_den(p2);
         return;
     }
@@ -334,11 +316,11 @@ void Ttt::biarc(P p0, P ts, P p4, P te, double r) {
 
     double alpha = beta*r;
     double ab = alpha+beta;
-    P p1 = p0 + ts*alpha; //add(p0, scale(ts, alpha));
-    P p3 = p4 + te*(-beta); //add(p4, scale(te, -beta));
-    P p2 = p1*(beta/ab) + p3*(alpha/ab); //add(scale(p1, beta/ab), scale(p3, alpha/ab));
-    P tm = p3-p2; //sub(p3, p2);
-
+    P p1 = p0 + ts*alpha; 
+    P p3 = p4 + te*(-beta); 
+    P p2 = p1*(beta/ab) + p3*(alpha/ab); 
+    P tm = p3-p2; 
+    // the two resulting arcs:
     arc(p0, p2, ts);
     arc(p2, p4, tm);    
 }

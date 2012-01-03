@@ -3,6 +3,10 @@
 
 class Writer {
 public:
+
+    virtual bool has_conic() {return false;}
+    virtual bool has_cubic() {return false;}
+    
     virtual void preamble() = 0;
     virtual void postamble(long int offset, extents line_extents) = 0;
     virtual void move_to(P p) = 0;

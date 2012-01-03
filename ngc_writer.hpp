@@ -4,8 +4,11 @@
 
 class NGC_Writer : public Writer {
 public:
-    NGC_Writer(std::string font, std::string text, bool unicode, double scale, bool blockdelete = false ) 
-        : ttfont(font), text(text), unicode(unicode), scale(scale), bd(blockdelete) {}
+    NGC_Writer( std::string font, std::string text, bool unicode, double scale, bool blockdelete = false ) 
+        :  ttfont(font), text(text), unicode(unicode), scale(scale), bd(blockdelete) {}
+    
+    virtual bool has_conic() {return true;}
+    virtual bool has_cubic() {return true;}
     
     virtual void preamble() {
         std::cout << "(font: "<< ttfont <<")\n"; //,ttfont);
@@ -42,19 +45,21 @@ public:
     }
     virtual void start_glyph(const char* s,wchar_t wc, long int offset) {
         if(isalnum(*s))
-            printf("(start of symbol %c)\n", wc);
+            std::cout << "(start of symbol " << (char)wc << ")\n"; //, wc);
         else
-            printf("(start of symbol 0x%02X)\n", wc);
+            std::cout << "(start of symbol 0x"<< std::hex << wc << std::dec <<")\n"; //, wc);
         
         /* comment with offset info */
-        printf("(starting X offset: %ld)\n", offset);
+        std::cout << "(starting X offset: "<< offset << ")\n"; //, offset);
     }
     virtual void end_glyph(extents glyph_extents, FT_Vector advance) {
         if ( glyph_extents.maxx > glyph_extents.minx ) {
-            printf( "(symbol extents: X = %ld to %ld, Y = %ld to %ld)\n",
-            glyph_extents.minx, glyph_extents.maxx, glyph_extents.miny, glyph_extents.maxy );
+            std::cout << "(symbol extents: X = " << glyph_extents.minx;
+            std::cout << " to " << glyph_extents.maxx;
+            std::cout << ", Y = " << glyph_extents.miny;
+            std::cout << " to " << glyph_extents.maxy << ")\n";
         }
-        printf ( "(symbol advance: X = %ld, Y = %ld)\n", advance.x, advance.y );
+        std::cout << "(symbol advance: X = "<< advance.x << ", Y = " << advance.y <<")\n"; //, ,  );
     }
     virtual void move_to(P p) {
         //if (debug) printf("(moveto %ld,%ld)\n", to->x, to->y);
@@ -75,7 +80,7 @@ public:
         std::cout << "G01 X [" << p.x << "*#3+#5] Y [" << p.y << "*#3+#6] (lineto)\n"; //, blockdelete, to->x, to->y);
     }
     virtual void conic_to(P to, P diff ) {
-        std::cout << "G5.1 X[" << to.x << "*#3+#5] Y[" << to.y << "*#3+#6] I["<< diff.x <<"*#3] J[" << diff.y <<"*#3] (conic_to)\n";
+        std::cout << "G5.1 X[" << to.x << "*#3+#5] Y[" << to.y << "*#3+#6] I["<< diff.x <<"*#3] J[" << diff.y <<"*#3]\n";
     }
     virtual void cubic_to(P ctrl1, P ctrl2, P to ) {
         std::cout << "G5.2 X[" << ctrl1.x << "*#3+#5] Y[" << ctrl1.y << "*#3+#6] L4 P1\n";
@@ -100,4 +105,5 @@ private:
     std::string ttfont;
     std::string text;
     bool unicode;
+    std::ostringstream stream;
 };
