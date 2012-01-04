@@ -60,30 +60,27 @@ public:
 private:
     long int render_char(FT_Face face, wchar_t c, long int offset, int linescale) ;
     void my_draw_bitmap(FT_Bitmap *b, FT_Int x, FT_Int y, int linescale);
+
+    void line(P p);
+    int my_line_to( const FT_Vector* to, void* user );
     
     int my_move_to( const FT_Vector* to, void* user );
-    int my_line_to( const FT_Vector* to, void* user );
+    
     int my_conic_to( const FT_Vector* control, const FT_Vector* to, void* user );
-    int my_cubic_to(const FT_Vector* control1, const FT_Vector* control2, const FT_Vector *to, void* user);
-    int my_cubic_as_biarcs(const FT_Vector* control1, const FT_Vector* control2, const FT_Vector *to, void* user);
     int my_conic_as_biarcs( const FT_Vector* control, const FT_Vector* to, void* user );
     
-    void line(P p);
+    int my_cubic_to(const FT_Vector* control1, const FT_Vector* control2, const FT_Vector *to, void* user);
+    int my_cubic_as_biarcs(const FT_Vector* control1, const FT_Vector* control2, const FT_Vector *to, void* user);
+    
     void arc(P p1, P p2, P d);
+    void arc_as_lines(P p1, P p2, P d);
     void biarc(P p0, P ts, P p4, P te, double r);
     
     // these static wrappers are required because Freetype wants callback
     // functions to be of (*void) type.
-    
-    static int move_to_wrapper( const FT_Vector* to, void* user ) {
-        self->my_move_to(to,user);
-    }
-    static int line_to_wrapper( const FT_Vector* to, void* user ) {
-        self->my_line_to(to,user);
-    }
-    static int conic_to_wrapper( const FT_Vector* control, const FT_Vector* to, void* user ) {
-        return self->my_conic_dispatch(control,to,user);
-    }
+    static int move_to_wrapper( const FT_Vector* to, void* user ) { self->my_move_to(to,user); }
+    static int line_to_wrapper( const FT_Vector* to, void* user ) { self->my_line_to(to,user); }
+    static int conic_to_wrapper( const FT_Vector* control, const FT_Vector* to, void* user ) { return self->my_conic_dispatch(control,to,user); }
     static int cubic_to_wrapper( const FT_Vector* control1, 
                                  const FT_Vector* control2,
                                  const FT_Vector *to, void* user ) {

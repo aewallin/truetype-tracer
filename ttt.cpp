@@ -1,6 +1,8 @@
 // experimental c++ port of truetype-tracer
 // January 2012, anders.e.e.wallin "at" gmail.com
 
+#include <cassert>
+
 #include "ttt.hpp"
 #include "p.hpp"
 #include "ngc_writer.hpp"
@@ -138,6 +140,10 @@ int Ttt::my_line_to( const FT_Vector* to, void* user ) {
     return 0;
 }
 
+void Ttt::line(P p) {
+    my_writer->line(p); // why no last_point, and glyph_extents update here?
+}
+
 int Ttt::my_conic_to( const FT_Vector* control, const FT_Vector* to, void* user ) {
     P to_pt(to);
     P ctrl_pt(control);
@@ -252,9 +258,7 @@ int Ttt::my_cubic_as_biarcs(const FT_Vector* control1,
 }
 
 
-void Ttt::line(P p) {
-    my_writer->line(p);
-}
+
 
 void Ttt::arc(P p1, P p2, P d) {
     d.unit();
@@ -265,45 +269,56 @@ void Ttt::arc(P p1, P p2, P d) {
         return;
     }
 
-    double r = - p.dot(p)/den;
+    double r = - p.dot(p)/den; // radius
     double i =  d.y*r;
     double j = -d.x*r;
 
-    P c(p1.x+i, p1.y+j );
-    double st = atan2(p1.y-c.y, p1.x-c.x);
-    double en = atan2(p2.y-c.y, p2.x-c.x);
+    P c(p1.x+i, p1.y+j ); // center
+    double st = atan2(p1.y-c.y, p1.x-c.x); // start angle
+    double en = atan2(p2.y-c.y, p2.x-c.x); // end angle
 
-    if(r < 0)
-        while(en <= st) en += 2*M_PI;
-    else
-        while(en >= st) en -= 2*M_PI;
-
+    if(r < 0) {
+        while (en <= st) en += 2*M_PI; // r<0 means st <= en
+        assert( st <= en );
+    } else {
+        while (en >= st) en -= 2*M_PI; // r>0 means en <= st
+        assert( en <= st );
+    }
     double bulge = tan(fabs(en-st)/4);
-    if(r > 0) bulge = -bulge;
-    double gr = (en - st) < M_PI ? fabs(r) : -fabs(r);
-    my_writer->arc(p2, r, gr, bulge);
+    if(r > 0) bulge = -bulge; // used for DXF
+    double gr = (en - st) < M_PI ? fabs(r) : -fabs(r); // gr used for NGC
+    if (my_writer->has_arc())
+        my_writer->arc(p2, r, gr, bulge);
+    else
+        arc_as_lines(p1,p2,d);
+}
+
+// for writers that don't have native arcs, approximate an arc with 
+// many lines
+void Ttt::arc_as_lines(P p1, P p2, P d) {
+    std::cout << "(arc_as_lines ! )\n";
 }
 
 void Ttt::biarc(P p0, P ts, P p4, P te, double r) {
-    ts.unit();
-    te.unit();
+    ts.unit(); // start-tangent (?)
+    te.unit(); // end-tangent (?)
 
-    P v = p0-p4; //sub(p0, p4);
+    P v = p0-p4; // vector from end to start?
 
-    double c = v.dot(v); // dot(v,v);
-    double b = 2 * v.dot( ts*r + te  ); // add(scale(ts, r), te));
+    double c = v.dot(v); // 
+    double b = 2 * v.dot( ts*r + te  ); // 
     double a = 2 * r * ( ts.dot(te) -1);
 
-    double disc = b*b-4*a*c;
+    double disc = b*b-4*a*c; // discriminant for solution to quadratic ?
     
-    if(a == 0 || disc < 0) {
+    if(a == 0 || disc < 0) { // linear eqn, or no sln to quadratic
         line(p4);
         return;
     }
 
     double disq = sqrt(disc);
-    double beta1 = (-b - disq) / 2 / a;
-    double beta2 = (-b + disq) / 2 / a;
+    double beta1 = (-b - disq) / 2 / a; // 1st sln to quadratic
+    double beta2 = (-b + disq) / 2 / a; // 2nd sln to quadratic
     double beta = std::max(beta1, beta2);
     
     if(beta <= 0) {
@@ -318,8 +333,8 @@ void Ttt::biarc(P p0, P ts, P p4, P te, double r) {
     P p2 = p1*(beta/ab) + p3*(alpha/ab); 
     P tm = p3-p2; 
     // the two resulting arcs:
-    arc(p0, p2, ts);
-    arc(p2, p4, tm);    
+    arc(p0, p2, ts); // arc from p0 to p2
+    arc(p2, p4, tm); // arc from p2 to p4
 }
 
 void Ttt::my_draw_bitmap(FT_Bitmap *b, FT_Int x, FT_Int y, int linescale) {

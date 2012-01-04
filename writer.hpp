@@ -3,7 +3,7 @@
 
 class Writer {
 public:
-
+    virtual bool has_arc() {return true;}
     virtual bool has_conic() {return false;}
     virtual bool has_cubic() {return false;}
     

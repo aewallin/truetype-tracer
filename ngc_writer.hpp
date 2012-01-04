@@ -7,8 +7,9 @@ public:
     NGC_Writer( std::string font, std::string text, bool unicode, double scale, bool blockdelete = false ) 
         :  ttfont(font), text(text), unicode(unicode), scale(scale), bd(blockdelete) {}
     
-    virtual bool has_conic() {return true;}
-    virtual bool has_cubic() {return true;}
+    virtual bool has_arc() {return true;}
+    virtual bool has_conic() {return false;}
+    virtual bool has_cubic() {return false;}
     
     virtual void preamble() {
         std::cout << "(font: "<< ttfont <<")\n"; 
