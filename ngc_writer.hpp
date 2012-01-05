@@ -4,20 +4,26 @@
 
 class NGC_Writer : public Writer {
 public:
-    NGC_Writer( std::string font, std::string text, bool unicode, double scale, bool blockdelete = false ) 
-        :  ttfont(font), text(text), unicode(unicode), scale(scale), bd(blockdelete) {
+    NGC_Writer() 
+        :   unicode(false), scale(0.0003), bd(false) {
+            has_arc(true);
+            has_conic(true);
+            has_cubic(true);
+    }
+    NGC_Writer(  bool unicode, double scale, bool blockdelete = false ) 
+        :   unicode(unicode), scale(scale), bd(blockdelete) {
             has_arc(true);
             has_conic(true);
             has_cubic(true);
     }
         
     virtual void preamble() {
-        std::cout << "(font: "<< ttfont <<")\n"; 
+        std::cout << "(font: "<< get_font() <<")\n"; 
         
         if(!unicode) {
             std::cout << "(text: ";
-            const char* s = text.data();
-            int l = text.length();
+            const char* s = get_text().data();
+            int l = get_text().length();
             for (int i=0; i<l; i++)
                 if(isalnum(s[i]))
                     std::cout << s[i];
@@ -37,7 +43,7 @@ public:
         std::cout << "(final X offset: "<< offset << ")\n"; 
         if ( line_extents.maxx > line_extents.minx ) {
             std::cout << "(overall extents: X = "<< line_extents.minx <<" to ";
-            std::cout << line_extents.maxx << ", Y = " << line_extents.miny << "  to ";
+            std::cout << line_extents.maxx << ", Y = " << line_extents.miny << " to ";
             std::cout << line_extents.maxy << ")\n"; 
         }
         std::cout << "G00 Z #1\nM02\n";
@@ -62,7 +68,7 @@ public:
     }
     virtual void move_to(P p) {
         //if (debug) printf("(moveto %ld,%ld)\n", to->x, to->y);
-        //char *blockdelete = user? "/": "";
+        //char *blockdelete = user ? "/": "";
         //printf("%sG00 Z #1\n", blockdelete);
         //printf("%sG00 X [%ld*#3+#5] Y [%ld*#3+#6] (moveto)\n", blockdelete, to->x, to->y);
         //printf("%sG01 Z [0-#2] F#4\n", blockdelete);
@@ -96,11 +102,14 @@ public:
         else
             std::cout << "G2 X[" << p2.x << "*#3+#5] Y["<< p2.y  << "*#3+#6] R["<< gr <<"*#3]\n";
     }
+    double get_scale() {return scale;}
+    void set_scale(double s) {scale = s;}
+    bool get_blockdelete() {return bd;}
+    void set_blockdelete(bool b) {bd = b;}
 private:
     
     double scale;
     bool bd; // blockdelete
-    std::string ttfont;
-    std::string text;
+
     bool unicode;
 };
