@@ -49,33 +49,29 @@ private:
 
 class Ttt {
 public:
-    Ttt( Writer* wr, 
-         std::string str,
-         int unicode ,
-         std::string ttfont ) ;
-         
-    std::string get_output() {
-        return buffer.str();
-    }
+    Ttt( Writer* wr, std::string str, int unicode , std::string ttfont );
+    std::string get_output() { return buffer.str(); }
 private:
     long int render_char(FT_Face face, wchar_t c, long int offset, int linescale) ;
     void my_draw_bitmap(FT_Bitmap *b, FT_Int x, FT_Int y, int linescale);
 
     void line(P p);
+    void arc(P p1, P p2, P d);
+    void biarc(P p0, P ts, P p4, P te, double r);
+
     int my_line_to( const FT_Vector* to, void* user );
-    
     int my_move_to( const FT_Vector* to, void* user );
     
-    int my_conic_to( const FT_Vector* control, const FT_Vector* to, void* user );
+    int        my_conic_to( const FT_Vector* control, const FT_Vector* to, void* user );
     int my_conic_as_biarcs( const FT_Vector* control, const FT_Vector* to, void* user );
-    
-    int my_cubic_to(const FT_Vector* control1, const FT_Vector* control2, const FT_Vector *to, void* user);
+    int  my_conic_as_lines( const FT_Vector* control, const FT_Vector* to, void* user );
+    std::pair<double,extents> conic_length(const FT_Vector* control, const FT_Vector* to);
+        
+    int        my_cubic_to(const FT_Vector* control1, const FT_Vector* control2, const FT_Vector *to, void* user);
     int my_cubic_as_biarcs(const FT_Vector* control1, const FT_Vector* control2, const FT_Vector *to, void* user);
-    
-    void arc(P p1, P p2, P d);
-    void arc_as_lines(P p1, P p2, P d);
-    void biarc(P p0, P ts, P p4, P te, double r);
-    
+    int  my_cubic_as_lines(const FT_Vector* control1, const FT_Vector* control2, const FT_Vector *to, void* user);
+    std::pair<double, extents> cubic_length(const FT_Vector* control1, const FT_Vector* control2, const FT_Vector* to);
+
     // these static wrappers are required because Freetype wants callback
     // functions to be of (*void) type.
     static int move_to_wrapper( const FT_Vector* to, void* user ) { self->my_move_to(to,user); }
@@ -89,20 +85,29 @@ private:
     
     // dispatch to native conic output, if writer is capable
     int my_conic_dispatch( const FT_Vector* control, const FT_Vector* to, void* user ) {
+        // my_writer->conic_comment()
+        // printf("(conicto %ld,%ld via %ld,%ld)\n", to->x,to->y,control->x,control->y);
+
         if (my_writer->has_conic())
             return self->my_conic_to(control,to,user);
-        else
+        else if (my_writer->has_arc())
             return self->my_conic_as_biarcs(control,to,user);
+        else
+            return self->my_conic_as_lines(control,to,user);
     }
     
-    // native or biarc cubic output
     int my_cubic_dispatch( const FT_Vector* control1, 
                                  const FT_Vector* control2,
                                  const FT_Vector *to, void* user ) {
+        // my_writer->cubic_comment()
+        // if (debug) printf("(cubicto %ld,%ld via %ld,%ld and %ld,%ld)\n", to->x,to->y,control1->x,control1->y, control2->x,control2->y);
+
         if (my_writer->has_cubic()) 
             return self->my_cubic_to(control1, control2, to,user);
-        else
+        else if (my_writer->has_arc())
             return self->my_cubic_as_biarcs(control1,control2,to,user);
+        else
+            return self->my_cubic_as_lines(control1,control2,to,user);
     }
         
     FT_Library library;

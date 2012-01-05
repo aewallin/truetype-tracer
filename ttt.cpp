@@ -2,6 +2,7 @@
 // January 2012, anders.e.e.wallin "at" gmail.com
 
 #include <cassert>
+#include <boost/tuple/tuple.hpp> // for tie()
 
 #include "ttt.hpp"
 #include "p.hpp"
@@ -20,10 +21,8 @@ void handle_ft_error(std::string where, int f, int x) {
 
 Ttt* Ttt::self = NULL;
 
-Ttt::Ttt(Writer* wr, 
-         std::string str,
-         int unicode ,
-         std::string ttfont ) 
+Ttt::Ttt(Writer* wr, std::string str, int unicode , std::string ttfont )
+ : my_writer(wr)
 {
     self = this; // so that static methods work..
     int error;
@@ -40,10 +39,7 @@ Ttt::Ttt(Writer* wr,
     if (error) handle_ft_error("FT_Set_Pixel_Sizes", error, __LINE__);
 
     if (unicode) setlocale(LC_CTYPE, "");
-    
-    
-    my_writer = wr; //
-    
+
     // this redirects to the buffer
     cout_redirect redir( buffer.rdbuf() );
     
@@ -154,23 +150,33 @@ int Ttt::my_conic_to( const FT_Vector* control, const FT_Vector* to, void* user 
     return 0;
 }
 
-// dispatch here if writer does not have native conics
-int Ttt::my_conic_as_biarcs( const FT_Vector* control, const FT_Vector* to, void* user ) {
-    int t;
+// calculate and return the length and extents of the conic 
+std::pair<double,extents> Ttt::conic_length(const FT_Vector* control, const FT_Vector* to) {
     FT_Vector point=last_point;
     double len=0;
-    int csteps = 10; 
-    double dsteps = 200; 
-    for(int t=1; t<=csteps; t++) {
+    int csteps = 10; // get this as a setting from Writer?
+    extents ext;
+    for(int t=1; t<=csteps; t++) { // this loop only calculates the length of the curve and updates extents
         double tf = (double)t/(double)csteps;
         double x = SQ(1-tf) * last_point.x + 2*tf*(1-tf) * control->x + SQ(tf) * to->x;
         double y = SQ(1-tf) * last_point.y + 2*tf*(1-tf) * control->y + SQ(tf) * to->y;
         len += hypot(x-point.x, y-point.y);
         point.x = x;
         point.y = y;
-        glyph_extents.add_point( point );
+        ext.add_point( point );
     }
+    return std::make_pair(len, ext);
+}
 
+// dispatch here if writer does not have native conics
+int Ttt::my_conic_as_biarcs( const FT_Vector* control, const FT_Vector* to, void* user ) {
+    double len;
+    extents ext;
+    boost::tie(len,ext) = conic_length(control,to);
+    glyph_extents.add_extents(ext);
+    double dsteps = 200; 
+    int steps = (int) std::max( (double)2, (double)len/(double)dsteps); // number of biarcs, minimum two
+    
     P p0( &last_point );
     P p1( control );
     P p2( to );
@@ -178,14 +184,36 @@ int Ttt::my_conic_as_biarcs( const FT_Vector* control, const FT_Vector* to, void
     P q1=p2 - p1;
     P ps=p0;
     P ts=q0;
-    int steps = (int) std::max( (double)2, (double)len/(double)dsteps);
-    for(t=1; t<=steps; t++) {
+    for(int t=1; t<=steps; t++) {
         double tf = (double)t/(double)steps;
         double t1 = 1-tf;
         P p = p0*SQ(t1) + p1*(2*tf*t1) + p2*SQ(tf);
         P t = q0*(t1) + q1*(tf); 
         biarc(ps, ts, p, t, 1.0); 
         ps = p; ts = t;
+    }
+
+    last_point = *to;
+    return 0;
+}
+
+// draw a second order curve from current pos to 'to' using control
+// Quadratic Bézier curves (a curve)
+// B(t) = (1 - t)^2A + 2t(1 - t)B + t^2C,  t in [0,1]. 
+int Ttt::my_conic_as_lines(const FT_Vector* control,const  FT_Vector* to, void* user ) {        
+    double len;
+    extents ext;
+    boost::tie(len,ext) = conic_length(control,to);
+    glyph_extents.add_extents(ext);
+    double dsteps = 200; // same value as for biarcs??
+    int steps = (int) std::max( (double)2, (double)len/(double)dsteps); // number of line-segments
+
+    for(int t=1; t<=steps; t++) {
+        double tf = (double)t/(double)steps;
+        double x = SQ(1-tf) * last_point.x + 2*tf*(1-tf) * control->x + SQ(tf) * to->x;
+        double y = SQ(1-tf) * last_point.y + 2*tf*(1-tf) * control->y + SQ(tf) * to->y;
+        P p(x,y);
+        line(p);
     }
 
     last_point = *to;
@@ -201,37 +229,48 @@ int Ttt::my_cubic_to(const FT_Vector* control1, const FT_Vector* control2, const
     return 0;
 }
 
-// dispatch to this func if writer doesn't have native cubics
-int Ttt::my_cubic_as_biarcs(const FT_Vector* control1, 
-                           const FT_Vector* control2, 
-                           const FT_Vector *to, void* user) {
+std::pair<double, extents> Ttt::cubic_length(const FT_Vector* control1, 
+                         const FT_Vector* control2,
+                         const FT_Vector* to) {
     FT_Vector point=last_point;
     double len=0;
-    
+    extents ext;
     // define the number of linear segments we use to approximate beziers
     // in the gcode and the number of polyline control points for dxf code.
-    int csteps=10;
+    int csteps=10; // fixme: get this value from the Writer
 
-    // define the subdivision of curves into arcs: approximate curve length
-    // in font coordinates to get one arc pair (minimum of two arc pairs
-    // per curve)
-    double dsteps=200;
-
-    for(int t=1; t<=csteps; t++) { // t in [0, 1]
-        double tf = (double)t/(double)csteps;
-        int x = CUBE(1-tf)*last_point.x     + 
+    for(int t=1; t<=csteps; t++) { 
+        double tf = (double)t/(double)csteps; // t in [0, 1]
+        double x = CUBE(1-tf)*last_point.x     + 
             SQ(1-tf)*3*tf*control1->x   +
             SQ(tf)*(1-tf)*3*control2->x +
             CUBE(tf)*to->x;
-        int y = CUBE(1-tf)*last_point.y     + 
+        double y = CUBE(1-tf)*last_point.y     + 
             SQ(1-tf)*3*tf*control1->y   +
             SQ(tf)*(1-tf)*3*control2->y +
             CUBE(tf)*to->y;
         len += hypot(x-point.x, y-point.y); // calculate total length of cubic
         point.x = x;
         point.y = y;
-        glyph_extents.add_point(point); // GLOBAL!! this only adds to the glyph_extents?
+        ext.add_point(point); // GLOBAL!! this only adds to the glyph_extents?
     }
+    return std::make_pair(len,ext);
+}
+
+// dispatch to this func if writer doesn't have native cubics
+int Ttt::my_cubic_as_biarcs(const FT_Vector* control1, 
+                           const FT_Vector* control2, 
+                           const FT_Vector *to, void* user) {
+    
+    double len;
+    extents ext;
+    boost::tie(len,ext) = cubic_length(control1,control2,to);
+    glyph_extents.add_extents(ext);
+    
+    // define the subdivision of curves into arcs: approximate curve length
+    // in font coordinates to get one arc pair (minimum of two arc pairs
+    // per curve)
+    double dsteps=200; // get this from writer!
 
     int steps = (int) std::max( (double)2, len/dsteps); // at least two steps
 
@@ -253,10 +292,38 @@ int Ttt::my_cubic_as_biarcs(const FT_Vector* control1,
         ps = p; 
         ts = t;
     }
-    last_point = *to;  // GLOBAL!!
+    last_point = *to; 
     return 0;
 }
 
+// draw a cubic spline from current pos to 'to' using control1,2
+// Cubic Bézier curves ( a compound curve )
+// B(t)=A(1-t)^3 + 3Bt(1-t)^2 + 3Ct^2(1-t) + Dt^3 , t in [0,1]. 
+int Ttt::my_cubic_as_lines(const FT_Vector* control1, const FT_Vector* control2, const FT_Vector *to, void* user)
+{    
+    double len;
+    extents ext;
+    boost::tie(len,ext) = cubic_length(control1,control2,to);
+    glyph_extents.add_extents(ext);
+    double dsteps=200; // get this from writer!
+    int steps = (int) std::max( (double)2, len/dsteps); // at least two steps
+    for(int t=1; t<=steps; t++) {
+        double tf = (double)t/(double)steps;
+        double x = CUBE(1-tf)*last_point.x     + 
+            SQ(1-tf)*3*tf*control1->x   +
+            SQ(tf)*(1-tf)*3*control2->x +
+            CUBE(tf)*to->x;
+        double y = CUBE(1-tf)*last_point.y     + 
+            SQ(1-tf)*3*tf*control1->y   +
+            SQ(tf)*(1-tf)*3*control2->y +
+            CUBE(tf)*to->y;
+            
+        P p(x,y);
+        line(p);
+    }
+    last_point = *to;
+    return 0;
+}
 
 
 
@@ -287,17 +354,9 @@ void Ttt::arc(P p1, P p2, P d) {
     double bulge = tan(fabs(en-st)/4);
     if(r > 0) bulge = -bulge; // used for DXF
     double gr = (en - st) < M_PI ? fabs(r) : -fabs(r); // gr used for NGC
-    if (my_writer->has_arc())
-        my_writer->arc(p2, r, gr, bulge);
-    else
-        arc_as_lines(p1,p2,d);
+    my_writer->arc(p2, r, gr, bulge);
 }
 
-// for writers that don't have native arcs, approximate an arc with 
-// many lines
-void Ttt::arc_as_lines(P p1, P p2, P d) {
-    std::cout << "(arc_as_lines ! )\n";
-}
 
 void Ttt::biarc(P p0, P ts, P p4, P te, double r) {
     ts.unit(); // start-tangent (?)

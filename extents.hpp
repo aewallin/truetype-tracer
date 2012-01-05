@@ -6,6 +6,9 @@
 #include FT_FREETYPE_H
 
 struct extents {
+    extents() {
+        reset();
+    }
     long int minx;
     long int maxx;
     long int miny;
