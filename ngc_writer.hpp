@@ -5,12 +5,12 @@
 class NGC_Writer : public Writer {
 public:
     NGC_Writer( std::string font, std::string text, bool unicode, double scale, bool blockdelete = false ) 
-        :  ttfont(font), text(text), unicode(unicode), scale(scale), bd(blockdelete) {}
-    
-    virtual bool has_arc() {return true;}
-    virtual bool has_conic() {return false;}
-    virtual bool has_cubic() {return false;}
-    
+        :  ttfont(font), text(text), unicode(unicode), scale(scale), bd(blockdelete) {
+            has_arc(true);
+            has_conic(true);
+            has_cubic(true);
+    }
+        
     virtual void preamble() {
         std::cout << "(font: "<< ttfont <<")\n"; 
         

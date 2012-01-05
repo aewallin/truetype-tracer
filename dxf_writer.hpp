@@ -4,7 +4,11 @@
 
 class DXF_Writer : public Writer {
 public:
-    DXF_Writer()   {}
+    DXF_Writer() {
+        has_arc(true);
+        has_conic(false);
+        has_cubic(false);
+    }
     
     virtual void preamble() {
         printf("  0\nSECTION\n  2\nENTITIES\n");
