@@ -21,24 +21,39 @@ public:
     
     virtual void move_comment(P p) {}
     virtual void move_to(P p) {
-
+        
+        if ( bp::len( seg ) != 0) {
+            seglist.append(seg); //std::cout << "(empty seg)\n";
+            seg = bp::list();
+        }
         std::cout << "pen UP \n";
         std::cout << "  move to " << p.x << " , " << p.y << "\n";
         std::cout << "pen DOWN \n";
+        bp::list pt;
+        pt.append(get_scale()*p.x);
+        pt.append(get_scale()*p.y);
+        seg.append( pt );
         last(p);
     }
     
     virtual void line(P p) {
         std::cout << last_point.x << " , " << last_point.y << " line " <<p.x << " , " << p.y << "\n";
         
-        append_segment(last_point, p);
-        
+        //append_segment(last_point, p);
+        bp::list pt;
+        pt.append(get_scale()*p.x);
+        pt.append(get_scale()*p.y);
+        seg.append( pt );
         last(p);
     }
     //virtual void line_comment(P c1, P c2, P to) {}
     virtual void line_to(P p) {
         std::cout << last_point.x << " , " << last_point.y << " lineto " << p.x << " , " << p.y << "\n";
-        append_segment(last_point, p);
+        //append_segment(last_point, p);
+        bp::list pt;
+        pt.append(get_scale()*p.x);
+        pt.append(get_scale()*p.y);
+        seg.append( pt );
         last(p);
     }
     
@@ -64,6 +79,10 @@ public:
             std::cout << "(start of symbol 0x"<< std::hex << wc << std::dec <<")\n"; 
     }
     virtual void end_glyph(extents glyph_extents, FT_Vector advance) {
+        if ( bp::len( seg ) != 0) {
+            seglist.append(seg); //std::cout << "(empty seg)\n";
+            seg = bp::list();
+        }
         std::cout << "(end glyph)\n";
     }
     bp::list get_segments() { return seglist; }
@@ -71,15 +90,17 @@ private:
     void last(P p) {
         last_point = p;
     }
+    /*
     void append_segment(P p1, P p2) {
         bp::list seg;
-        seg.append( p1.x );
-        seg.append( p1.y );
-        seg.append( p2.x );
-        seg.append( p2.y );
+        seg.append( get_scale()*p1.x );
+        seg.append( get_scale()*p1.y );
+        seg.append( get_scale()*p2.x );
+        seg.append( get_scale()*p2.y );
         seglist.append(seg);
-    }
+    }*/
     bp::list seglist;
+    bp::list seg;
     //std::vector<P> seg;
     P last_point;
 };

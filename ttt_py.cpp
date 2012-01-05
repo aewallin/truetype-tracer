@@ -74,10 +74,11 @@ BOOST_PYTHON_MODULE(ttt) {
         .add_property("arc", &Writer::get_arc, &Writer::set_arc)
         .add_property("conic", &Writer::get_conic, &Writer::set_conic)
         .add_property("cubic", &Writer::get_cubic, &Writer::set_cubic)
+        .add_property("scale", &Writer::get_scale, &Writer::set_scale)
     ;
     bp::class_< NGC_Writer, bp::bases<Writer> >("NGC_Writer")
         .add_property("blockdelete", &NGC_Writer::get_blockdelete, &NGC_Writer::set_blockdelete)
-        .add_property("scale", &NGC_Writer::get_scale, &NGC_Writer::set_scale)
+        
     ;
     bp::class_< SEG_Writer, bp::bases<Writer> >("SEG_Writer")
         .def( "get_segments", &SEG_Writer::get_segments)

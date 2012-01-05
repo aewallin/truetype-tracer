@@ -5,16 +5,18 @@
 class NGC_Writer : public Writer {
 public:
     NGC_Writer() 
-        :   unicode(false), scale(0.0003), bd(false) {
+        :   unicode(false),  bd(false) {
             has_arc(true);
             has_conic(true);
             has_cubic(true);
+            set_scale(0.0003);
     }
     NGC_Writer(  bool unicode, double scale, bool blockdelete = false ) 
-        :   unicode(unicode), scale(scale), bd(blockdelete) {
+        :   unicode(unicode),  bd(blockdelete) {
             has_arc(true);
             has_conic(true);
             has_cubic(true);
+            set_scale(scale);
     }
         
     virtual void preamble() {
@@ -34,7 +36,7 @@ public:
         
         std::cout << "#1=0.1    (SafeHeight)\n";
         std::cout << "#2=0.01   (Depth of Cut)\n";
-        std::cout << "#3="<< scale << " (XY Scale)\n"; 
+        std::cout << "#3="<< get_scale() << " (XY Scale)\n"; 
         std::cout << "#4=10.0   (Feed)\n";
         std::cout << "#5=0.0    (X offset)\n";
         std::cout << "#6=0.0    (Y offset)\n";    
@@ -110,13 +112,13 @@ public:
         else
             std::cout << "G2 X[" << p2.x << "*#3+#5] Y["<< p2.y  << "*#3+#6] R["<< gr <<"*#3]\n";
     }
-    double get_scale() {return scale;}
-    void set_scale(double s) {scale = s;}
+    //double get_scale() {return scale;}
+    //void set_scale(double s) {scale = s;}
     bool get_blockdelete() {return bd;}
     void set_blockdelete(bool b) {bd = b;}
 private:
     
-    double scale;
+    //double scale;
     bool bd; // blockdelete
 
     bool unicode;

@@ -26,6 +26,9 @@ public:
     void set_text(std::string t) {text = t;}
     std::string get_text() { return text; }
     
+    void set_scale(double s) {scale = s;}
+    double get_scale() { return scale; }
+    
     virtual void preamble() {}
     virtual void postamble(long int offset, extents line_extents) {}
     
@@ -52,4 +55,5 @@ private:
     bool _arc;
     std::string ttfont;
     std::string text;
+    double scale;
 };
