@@ -8,6 +8,7 @@ namespace bp = boost::python;
 #include "writer.hpp"
 #include "ngc_writer.hpp"
 #include "dxf_writer.hpp"
+#include "segment_writer.hpp"
 
 // this is the default font used if not specified on commandline
 #define TTFONT "/usr/share/fonts/truetype/freefont/FreeSerifBoldItalic.ttf"
@@ -77,8 +78,10 @@ BOOST_PYTHON_MODULE(ttt) {
     bp::class_< NGC_Writer, bp::bases<Writer> >("NGC_Writer")
         .add_property("blockdelete", &NGC_Writer::get_blockdelete, &NGC_Writer::set_blockdelete)
         .add_property("scale", &NGC_Writer::get_scale, &NGC_Writer::set_scale)
-        //.def(bp::init<double, unsigned int>())
     ;
+    bp::class_< SEG_Writer, bp::bases<Writer> >("SEG_Writer")
+    ;
+    
     /*
     bp::class_< VoronoiDiagram_py, bp::bases<VoronoiDiagram> >("VoronoiDiagram")
         .def(bp::init<double, unsigned int>())

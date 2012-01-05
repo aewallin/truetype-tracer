@@ -28,11 +28,20 @@ public:
     
     virtual void preamble() {}
     virtual void postamble(long int offset, extents line_extents) {}
+    
+    virtual void move_comment(P p) {}
     virtual void move_to(P p) {}
     virtual void line(P p) {}
+    virtual void line_comment(P c1, P c2, P to) {}
     virtual void line_to(P p) {}
+    
     virtual void cubic_to(P c1, P c2, P to) {}
+    virtual void cubic_comment(P c1, P c2, P to) {}
+    
     virtual void conic_to(P to, P diff) {}
+    virtual void conic_comment(P to, P diff) {}
+    virtual void conic_as_lines_comment(int steps) {}
+    
     virtual void arc_small_den(P p) {} // dxf_writer lacks this functn!
     virtual void arc(P p2, double r, double gr, double bulge) {} 
     virtual void start_glyph(const char* s, wchar_t wc, long int offset) {}

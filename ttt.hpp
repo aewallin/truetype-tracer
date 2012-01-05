@@ -85,8 +85,12 @@ private:
     
     // dispatch to native conic output, if writer is capable
     int my_conic_dispatch( const FT_Vector* control, const FT_Vector* to, void* user ) {
-        // my_writer->conic_comment()
-        // printf("(conicto %ld,%ld via %ld,%ld)\n", to->x,to->y,control->x,control->y);
+        
+        P to_pt(to);
+        P ctrl_pt(control);
+        P last_pt(&last_point);
+        P diff =  ctrl_pt-last_pt ;
+        my_writer->conic_comment(to_pt, diff);
 
         if (my_writer->has_conic())
             return self->my_conic_to(control,to,user);
@@ -99,9 +103,11 @@ private:
     int my_cubic_dispatch( const FT_Vector* control1, 
                                  const FT_Vector* control2,
                                  const FT_Vector *to, void* user ) {
-        // my_writer->cubic_comment()
-        // if (debug) printf("(cubicto %ld,%ld via %ld,%ld and %ld,%ld)\n", to->x,to->y,control1->x,control1->y, control2->x,control2->y);
-
+        P ctl1(control1);
+        P ctl2(control2);
+        P to_pt(to);
+        my_writer->cubic_comment(ctl1,ctl2,to_pt);
+    
         if (my_writer->has_cubic()) 
             return self->my_cubic_to(control1, control2, to,user);
         else if (my_writer->has_arc())

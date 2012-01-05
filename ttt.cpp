@@ -207,7 +207,7 @@ int Ttt::my_conic_as_lines(const FT_Vector* control,const  FT_Vector* to, void* 
     glyph_extents.add_extents(ext);
     double dsteps = 200; // same value as for biarcs??
     int steps = (int) std::max( (double)2, (double)len/(double)dsteps); // number of line-segments
-
+    my_writer->conic_as_lines_comment(steps);
     for(int t=1; t<=steps; t++) {
         double tf = (double)t/(double)steps;
         double x = SQ(1-tf) * last_point.x + 2*tf*(1-tf) * control->x + SQ(tf) * to->x;

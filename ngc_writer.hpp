@@ -87,6 +87,14 @@ public:
     virtual void conic_to(P to, P diff ) {
         std::cout << "G5.1 X[" << to.x << "*#3+#5] Y[" << to.y << "*#3+#6] I["<< diff.x <<"*#3] J[" << diff.y <<"*#3]\n";
     }
+    virtual void conic_comment(P to, P diff) {
+        // printf("(conicto %ld,%ld via %ld,%ld)\n", to->x,to->y,control->x,control->y);
+    }
+    
+    virtual void cubic_comment(P c1, P c2, P to) {
+        std::cout << "(cubicto " << to.x << ", " << to.y << " via " << c1.x << ", " << c1.y;
+        std::cout << " and " << c2.x << ", " << c2.y << "\n";
+    }
     virtual void cubic_to(P ctrl1, P ctrl2, P to ) {
         std::cout << "G5.2 X[" << ctrl1.x << "*#3+#5] Y[" << ctrl1.y << "*#3+#6] L4 P1\n";
         std::cout << "X[" << ctrl2.x << "*#3+#5] Y[" << ctrl2.y << "*#3+#6] P1\n"; //, control2->x, control2->y
