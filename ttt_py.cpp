@@ -58,7 +58,7 @@ static std::string ttt_with_writer(std::string str, Writer* wr) {
     //delete wr;
     return outp;
 }
-
+ 
 BOOST_PYTHON_MODULE(ttt) {
 
     bp::def("version", version);
@@ -80,6 +80,7 @@ BOOST_PYTHON_MODULE(ttt) {
         .add_property("scale", &NGC_Writer::get_scale, &NGC_Writer::set_scale)
     ;
     bp::class_< SEG_Writer, bp::bases<Writer> >("SEG_Writer")
+        .def( "get_segments", &SEG_Writer::get_segments)
     ;
     
     /*

@@ -1,6 +1,8 @@
 
 #pragma once
-
+//#include <vector>
+#include <boost/python.hpp>
+namespace bp = boost::python;
 #include "writer.hpp"
 
 class SEG_Writer : public Writer {
@@ -19,16 +21,25 @@ public:
     
     virtual void move_comment(P p) {}
     virtual void move_to(P p) {
+
         std::cout << "pen UP \n";
         std::cout << "  move to " << p.x << " , " << p.y << "\n";
         std::cout << "pen DOWN \n";
+        last(p);
     }
+    
     virtual void line(P p) {
-        std::cout << "  line " << p.x << " , " << p.y << "\n";
+        std::cout << last_point.x << " , " << last_point.y << " line " <<p.x << " , " << p.y << "\n";
+        
+        append_segment(last_point, p);
+        
+        last(p);
     }
-    virtual void line_comment(P c1, P c2, P to) {}
+    //virtual void line_comment(P c1, P c2, P to) {}
     virtual void line_to(P p) {
-        std::cout << "lineto " << p.x << " , " << p.y << "\n";
+        std::cout << last_point.x << " , " << last_point.y << " lineto " << p.x << " , " << p.y << "\n";
+        append_segment(last_point, p);
+        last(p);
     }
     
     virtual void cubic_comment(P c1, P c2, P to) {
@@ -42,9 +53,9 @@ public:
     virtual void conic_as_lines_comment(int steps) {
         std::cout << " (approximating conic with "<< steps << " line segments)\n";
     }
-    virtual void conic_to(P to, P diff) {}
-    virtual void arc_small_den(P p) {} // dxf_writer lacks this functn!
-    virtual void arc(P p2, double r, double gr, double bulge) {} 
+    //virtual void conic_to(P to, P diff) {}
+    //virtual void arc_small_den(P p) {} // dxf_writer lacks this functn!
+    //virtual void arc(P p2, double r, double gr, double bulge) {} 
     
     virtual void start_glyph(const char* s, wchar_t wc, long int offset) {
         if(isalnum(*s))
@@ -55,5 +66,20 @@ public:
     virtual void end_glyph(extents glyph_extents, FT_Vector advance) {
         std::cout << "(end glyph)\n";
     }
-
+    bp::list get_segments() { return seglist; }
+private:
+    void last(P p) {
+        last_point = p;
+    }
+    void append_segment(P p1, P p2) {
+        bp::list seg;
+        seg.append( p1.x );
+        seg.append( p1.y );
+        seg.append( p2.x );
+        seg.append( p2.y );
+        seglist.append(seg);
+    }
+    bp::list seglist;
+    //std::vector<P> seg;
+    P last_point;
 };

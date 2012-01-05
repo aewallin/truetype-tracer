@@ -5,6 +5,7 @@
 #include FT_FREETYPE_H
 
 struct P { 
+    P() : x(0), y(0) {}
     P(double x,double y) : x(x), y(y) {}
     P(const FT_Vector *v): x(v->x) , y(v->y) { }
     double x;

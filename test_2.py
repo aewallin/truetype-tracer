@@ -9,3 +9,5 @@ wr.conic = False
 wr.cubic = False
 s3 = ttt.ttt("LT",wr)
 print s3
+s = wr.get_segments()
+print s
