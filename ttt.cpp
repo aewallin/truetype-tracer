@@ -61,7 +61,7 @@ Ttt::Ttt(Writer* wr, std::string str, int unicode , std::string ttfont )
         s += r; l -= r;
         my_writer->end_glyph(glyph_extents, advance);
     }
-    
+    my_writer->set_extents(line_extents);
     my_writer->postamble(offset, line_extents);
 }
 

@@ -75,6 +75,7 @@ BOOST_PYTHON_MODULE(ttt) {
         .add_property("conic", &Writer::get_conic, &Writer::set_conic)
         .add_property("cubic", &Writer::get_cubic, &Writer::set_cubic)
         .add_property("scale", &Writer::get_scale, &Writer::set_scale)
+        .add_property("extents", &Writer::get_extents)
     ;
     bp::class_< NGC_Writer, bp::bases<Writer> >("NGC_Writer")
         .add_property("blockdelete", &NGC_Writer::get_blockdelete, &NGC_Writer::set_blockdelete)

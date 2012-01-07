@@ -1,6 +1,6 @@
 
 #pragma once
-//#include <vector>
+
 #include <boost/python.hpp>
 namespace bp = boost::python;
 #include "writer.hpp"
@@ -49,7 +49,6 @@ public:
     //virtual void line_comment(P c1, P c2, P to) {}
     virtual void line_to(P p) {
         std::cout << last_point.x << " , " << last_point.y << " lineto " << p.x << " , " << p.y << "\n";
-        //append_segment(last_point, p);
         bp::list pt;
         pt.append(get_scale()*p.x);
         pt.append(get_scale()*p.y);
@@ -90,17 +89,9 @@ private:
     void last(P p) {
         last_point = p;
     }
-    /*
-    void append_segment(P p1, P p2) {
-        bp::list seg;
-        seg.append( get_scale()*p1.x );
-        seg.append( get_scale()*p1.y );
-        seg.append( get_scale()*p2.x );
-        seg.append( get_scale()*p2.y );
-        seglist.append(seg);
-    }*/
+
     bp::list seglist;
     bp::list seg;
-    //std::vector<P> seg;
+
     P last_point;
 };

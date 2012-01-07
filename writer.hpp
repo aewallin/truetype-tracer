@@ -1,6 +1,10 @@
 
 #pragma once
 
+#include <boost/python.hpp>
+namespace bp = boost::python;
+#include "extents.hpp"
+
 // this is a base-class for Writers.
 // Ttt calls this public interface 
 class Writer {
@@ -29,6 +33,17 @@ public:
     void set_scale(double s) {scale = s;}
     double get_scale() { return scale; }
     
+    bp::list get_extents() {
+        bp::list l;
+        l.append(ext.minx);
+        l.append(ext.maxx);
+        l.append(ext.miny);
+        l.append(ext.maxy);
+        return l;
+    }
+    void set_extents(extents e) {
+        ext=e;
+    }
     virtual void preamble() {}
     virtual void postamble(long int offset, extents line_extents) {}
     
@@ -56,4 +71,5 @@ private:
     std::string ttfont;
     std::string text;
     double scale;
+    extents ext;
 };
