@@ -4,9 +4,9 @@ import time
 # get segments from ttt
 def ttt2ngc(text,scale):
     wr = ttt.NGC_Writer()
-    wr.arc   = True   # if False, approximate arcs with lines.
-    wr.conic = True   # if False, approximate conic with arc/line 
-    wr.cubic = True   # if False, approximate cubic with arc/line 
+    wr.arc   = False   # if False, approximate arcs with lines.
+    wr.conic = False   # if False, approximate conic with arc/line 
+    wr.cubic = False   # if False, approximate cubic with arc/line 
     
     wr.scale = float(1)/float(scale)
     return ttt.ttt(text,wr)
