@@ -29,6 +29,31 @@ if( FREETYPE_FOUND )
 endif()
 include_directories(${FREETYPE_INCLUDE_DIRS})
 
+
+#### create version_string.hpp, http://stackoverflow.com/questions/3780667
+# include the output directory, where the version_string.hpp file is generated
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+# a custom target that is always built
+add_custom_target(
+    version_string 
+    ALL
+    DEPENDS ver_string 
+)
+# creates version_string.hpp using cmake script
+add_custom_command(
+    OUTPUT ver_string ${CMAKE_CURRENT_BINARY_DIR}/version_string.hpp
+    COMMAND ${CMAKE_COMMAND} -DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+                                            -P ${CMAKE_CURRENT_SOURCE_DIR}/version_string.cmake
+)
+# version_string.hpp is a generated file
+set_source_files_properties(
+    ${CMAKE_CURRENT_BINARY_DIR}/version_string.hpp
+    PROPERTIES GENERATED TRUE
+    HEADER_FILE_ONLY TRUE
+)
+#### end create version_string.hpp
+
+
 # this makes the Python module
 add_library(
     ttt
