@@ -9,10 +9,14 @@ namespace bp = boost::python;
 #include "ngc_writer.hpp"
 #include "dxf_writer.hpp"
 #include "segment_writer.hpp"
+#include "version_string.hpp"
 
 // this is the default font used if not specified on commandline
 #define TTFONT "/usr/share/fonts/truetype/freefont/FreeSerifBoldItalic.ttf"
 
+std::string version() {
+    return VERSION_STRING;
+}
 
 static std::string dxf1(std::string str) {
     Writer* wr = new DXF_Writer( );
@@ -41,10 +45,11 @@ static std::string dxf0() {
 static std::string ngc0() {
     return ngc1("Hello World.");
 }    
-    
+
+/*
 std::string version() {
     return "TTT TrueType tracer, c++ port!";
-}
+}*/
 
 static std::string ttt_with_writer(std::string str, Writer* wr) {
     //Writer* wr = new NGC_Writer( TTFONT, str, false, 0.003, false );

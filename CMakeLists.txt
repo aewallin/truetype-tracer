@@ -61,6 +61,10 @@ add_library(
     ttt.cpp
     ttt_py.cpp
 )
+add_dependencies( 
+    ttt
+    version_string 
+)
 set_target_properties(ttt PROPERTIES PREFIX "") 
 target_link_libraries(ttt ${Boost_LIBRARIES} ${FREETYPE_LIBRARY}) 
 
