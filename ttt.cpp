@@ -328,7 +328,7 @@ int Ttt::my_cubic_as_lines(const FT_Vector* control1, const FT_Vector* control2,
 
 
 void Ttt::arc(P p1, P p2, P d) {
-    d.unit();
+    d = d.unit();
     P p = p2-p1;
     double den = 2 * (p.y*d.x - p.x*d.y);
     if(fabs(den) < 1e-10) { // does this happen for DXF?
@@ -353,14 +353,14 @@ void Ttt::arc(P p1, P p2, P d) {
     }
     double bulge = tan(fabs(en-st)/4);
     if(r > 0) bulge = -bulge; // used for DXF
-    double gr = (en - st) < M_PI ? fabs(r) : -fabs(r); // gr used for NGC
+    double gr = ((en - st) < M_PI) ? fabs(r) : -fabs(r); // gr used for NGC
     my_writer->arc(p2, r, gr, bulge);
 }
 
 
 void Ttt::biarc(P p0, P ts, P p4, P te, double r) {
-    ts.unit(); // start-tangent (?)
-    te.unit(); // end-tangent (?)
+    ts = ts.unit(); // start-tangent (?)
+    te = te.unit(); // end-tangent (?)
 
     P v = p0-p4; // vector from end to start?
 

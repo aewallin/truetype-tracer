@@ -1,5 +1,8 @@
 #pragma once
 
+#include <iostream>
+#include <iomanip>
+
 #include "writer.hpp"
 
 class NGC_Writer : public Writer {
@@ -20,6 +23,8 @@ public:
     }
         
     virtual void preamble() {
+        std::cout << std::setiosflags( std::ios::fixed) << std::setprecision(6);
+        
         std::cout << "(font: "<< get_font() <<")\n"; 
         
         if(!unicode) {
