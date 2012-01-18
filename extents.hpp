@@ -1,10 +1,10 @@
-
-
 #pragma once
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+// this struct represents an axis-aligned bounding-box for a glyph or the whole input text.
+// The units are that of FreeType.
 struct extents {
     extents() {
         reset();
@@ -19,6 +19,7 @@ struct extents {
         minx =  2000000000;
         miny =  2000000000;
     }
+    // update to include the give point
     void add_point( const FT_Vector& point ) {
         if ( point.x > maxx ) maxx = point.x;
         if ( point.y > maxy ) maxy = point.y;

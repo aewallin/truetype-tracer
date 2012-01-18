@@ -21,6 +21,7 @@ void handle_ft_error(std::string where, int f, int x) {
 
 Ttt* Ttt::self = NULL;
 
+// everything happens in this constructor.
 Ttt::Ttt(Writer* wr, std::string str, int unicode , std::string ttfont )
  : my_writer(wr)
 {
@@ -54,12 +55,12 @@ Ttt::Ttt(Writer* wr, std::string str, int unicode , std::string ttfont )
         wchar_t wc;
         int r = mbtowc(&wc, s, l); // convert multibyte s, store in wc. return number of converted bytes
         if(r==-1) { s++; continue; }
-        my_writer->start_glyph(s,wc, offset);
+        my_writer->start_glyph(s,wc, offset);  // comment at start of glyph
         glyph_extents.reset();
-        offset += render_char(face, wc, offset, linescale);
+        offset += render_char(face, wc, offset, linescale); // the glyph
         line_extents.add_extents(glyph_extents);
         s += r; l -= r;
-        my_writer->end_glyph(glyph_extents, advance);
+        my_writer->end_glyph(glyph_extents, advance); // comment at end of glyph
     }
     my_writer->set_extents(line_extents);
     my_writer->postamble(offset, line_extents);
@@ -127,7 +128,7 @@ int Ttt::my_move_to( const FT_Vector* to, void* user ) {
     glyph_extents.add_point( *to);
     return 0;
 }
-
+// from the current point, linear move to target
 int Ttt::my_line_to( const FT_Vector* to, void* user ) {
     P p(to);
     my_writer->line_to(p);
@@ -135,11 +136,13 @@ int Ttt::my_line_to( const FT_Vector* to, void* user ) {
     glyph_extents.add_point( *to);
     return 0;
 }
-
+// output a line
+// FIXME: add comment/explanation of why this is required and we cannot use my_line_to() ?
 void Ttt::line(P p) {
     my_writer->line(p); // why no last_point, and glyph_extents update here?
 }
 
+// output a conic
 int Ttt::my_conic_to( const FT_Vector* control, const FT_Vector* to, void* user ) {
     P to_pt(to);
     P ctrl_pt(control);
@@ -150,7 +153,8 @@ int Ttt::my_conic_to( const FT_Vector* control, const FT_Vector* to, void* user 
     return 0;
 }
 
-// calculate and return the length and extents of the conic 
+// calculate and return the length and extents of a conic 
+// FIXME: is hard-coded csteps=10 good? should it be adjustable?
 std::pair<double,extents> Ttt::conic_length(const FT_Vector* control, const FT_Vector* to) {
     FT_Vector point=last_point;
     double len=0;
@@ -169,6 +173,8 @@ std::pair<double,extents> Ttt::conic_length(const FT_Vector* control, const FT_V
 }
 
 // dispatch here if writer does not have native conics
+// output a conic as many biarcs
+// FIXME: make dsteps=200 an adjustable property
 int Ttt::my_conic_as_biarcs( const FT_Vector* control, const FT_Vector* to, void* user ) {
     double len;
     extents ext;
@@ -197,15 +203,16 @@ int Ttt::my_conic_as_biarcs( const FT_Vector* control, const FT_Vector* to, void
     return 0;
 }
 
-// draw a second order curve from current pos to 'to' using control
-// Quadratic Bézier curves (a curve)
+// approximate a second order curve from current pos to 'to' using control, as line-segments
+// The Quadratic Bézier curve is
 // B(t) = (1 - t)^2A + 2t(1 - t)B + t^2C,  t in [0,1]. 
-int Ttt::my_conic_as_lines(const FT_Vector* control,const  FT_Vector* to, void* user ) {        
+// FIXME: make hard-coded dsteps=200 adjustable (a property of Writer?)
+int Ttt::my_conic_as_lines(const FT_Vector* control, const  FT_Vector* to, void* user ) {        
     double len;
     extents ext;
     boost::tie(len,ext) = conic_length(control,to);
     glyph_extents.add_extents(ext);
-    double dsteps = 200; // same value as for biarcs??
+    double dsteps = 200; // FIXME: get this from Writer? here we use the same value as for biarcs? is that OK?
     int steps = (int) std::max( (double)2, (double)len/(double)dsteps); // number of line-segments
     my_writer->conic_as_lines_comment(steps);
     for(int t=1; t<=steps; t++) {
@@ -220,6 +227,7 @@ int Ttt::my_conic_as_lines(const FT_Vector* control,const  FT_Vector* to, void* 
     return 0;
 }
 
+// output a cubic
 int Ttt::my_cubic_to(const FT_Vector* control1, const FT_Vector* control2, const FT_Vector *to, void* user) {
     P ctrl1(control1);
     P ctrl2(control2);
@@ -229,6 +237,8 @@ int Ttt::my_cubic_to(const FT_Vector* control1, const FT_Vector* control2, const
     return 0;
 }
 
+// calculate the arc-length and extents of a cubic
+// FIXME: is the hard-coded csteps=10 sufficient? optimal?
 std::pair<double, extents> Ttt::cubic_length(const FT_Vector* control1, 
                          const FT_Vector* control2,
                          const FT_Vector* to) {
@@ -258,10 +268,11 @@ std::pair<double, extents> Ttt::cubic_length(const FT_Vector* control1,
 }
 
 // dispatch to this func if writer doesn't have native cubics
+// instead of a single cubic, output many arcs
+// FIXME: make the number of arcs adjustabe (a property of Writer?)
 int Ttt::my_cubic_as_biarcs(const FT_Vector* control1, 
                            const FT_Vector* control2, 
                            const FT_Vector *to, void* user) {
-    
     double len;
     extents ext;
     boost::tie(len,ext) = cubic_length(control1,control2,to);
@@ -270,7 +281,7 @@ int Ttt::my_cubic_as_biarcs(const FT_Vector* control1,
     // define the subdivision of curves into arcs: approximate curve length
     // in font coordinates to get one arc pair (minimum of two arc pairs
     // per curve)
-    double dsteps=200; // get this from writer!
+    double dsteps=200; // FIXME: get this from Writer!?
 
     int steps = (int) std::max( (double)2, len/dsteps); // at least two steps
 
@@ -325,8 +336,7 @@ int Ttt::my_cubic_as_lines(const FT_Vector* control1, const FT_Vector* control2,
     return 0;
 }
 
-
-
+// output an arc
 void Ttt::arc(P p1, P p2, P d) {
     d = d.unit();
     P p = p2-p1;
@@ -357,7 +367,7 @@ void Ttt::arc(P p1, P p2, P d) {
     my_writer->arc(p2, r, gr, bulge);
 }
 
-
+// output a biarc
 void Ttt::biarc(P p0, P ts, P p4, P te, double r) {
     ts = ts.unit(); // start-tangent (?)
     te = te.unit(); // end-tangent (?)
@@ -396,6 +406,7 @@ void Ttt::biarc(P p0, P ts, P p4, P te, double r) {
     arc(p2, p4, tm); // arc from p2 to p4
 }
 
+// FIXME: the zigzag 'infill' is completely untested
 void Ttt::my_draw_bitmap(FT_Bitmap *b, FT_Int x, FT_Int y, int linescale) {
     // FT_Int i, j;
     static int oldbit; // ?

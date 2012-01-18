@@ -2,6 +2,8 @@
 
 #include "writer.hpp"
 
+// This Writer should write a valid DXF file to stdout, or directly to a file.
+// FIXME: not much is working right now. Need to copy/paste stuff from ttt.c
 class DXF_Writer : public Writer {
 public:
     DXF_Writer() {

@@ -1,10 +1,11 @@
-
 #pragma once
 
 #include <boost/python.hpp>
 namespace bp = boost::python;
 #include "writer.hpp"
 
+// this experimental writer outputs python lists with coordinates.
+// used for testing OpenVoronoi.
 class SEG_Writer : public Writer {
 public:
     SEG_Writer() {

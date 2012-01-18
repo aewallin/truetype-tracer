@@ -5,6 +5,15 @@
 
 #include "writer.hpp"
 
+// This writer outputs a G-code file to stdout.
+// Arcs, Cubics, Conics are optional.
+// If cubics or conics are set to false, then arcs/biarcs are output instead.
+// If arcs are set to false, then line-segments are output instead.
+// FIXME:
+// - make blockdelete work
+// - make number of approximating arcs/line-segments adjustable
+// - optionally output g-code without variables (for non-LinuxCNC controllers)
+// - make number of decimals in the output adjustable
 class NGC_Writer : public Writer {
 public:
     NGC_Writer() 

@@ -47,6 +47,10 @@ private:
     std::streambuf * old;
 };
 
+// a class for the core ttt-algorithm
+// calls the FreeType library to get geometry, and then calls a Writer to produce output
+// FIXME:
+// - make font an adjustabe parameter
 class Ttt {
 public:
     Ttt( Writer* wr, std::string str, int unicode , std::string ttfont );
@@ -58,6 +62,8 @@ private:
     void line(P p);
     void arc(P p1, P p2, P d);
     void biarc(P p0, P ts, P p4, P te, double r);
+
+// FIXME: none of these int return-values are used for anything. Can be changed to void?
 
     int my_line_to( const FT_Vector* to, void* user );
     int my_move_to( const FT_Vector* to, void* user );
@@ -84,6 +90,8 @@ private:
     }
     
     // dispatch to native conic output, if writer is capable
+    // otherwise approximate as arcs, if writer has arcs
+    // otherwise approximate as lines, if writer does not have arcs
     int my_conic_dispatch( const FT_Vector* control, const FT_Vector* to, void* user ) {
         
         P to_pt(to);
@@ -100,6 +108,7 @@ private:
             return self->my_conic_as_lines(control,to,user);
     }
     
+    // output a cubic as native, arcs, or lines.
     int my_cubic_dispatch( const FT_Vector* control1, 
                                  const FT_Vector* control2,
                                  const FT_Vector *to, void* user ) {

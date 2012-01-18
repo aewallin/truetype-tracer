@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <boost/python.hpp>
@@ -6,7 +5,9 @@ namespace bp = boost::python;
 #include "extents.hpp"
 
 // this is a base-class for Writers.
-// Ttt calls this public interface 
+// Ttt calls this public interface, to produce output in various formats.
+// subclass this to produce another writer.
+// FIXME: dwg, APT, SVG, STEP and other formats could possibly be produced?
 class Writer {
 public:
     virtual bool has_arc() {return _arc;}
