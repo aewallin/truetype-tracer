@@ -84,30 +84,13 @@ execute_process(
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-set(CPACK_GENERATOR "DEB")
-set(CPACK_PACKAGE_CONTACT "Anders Wallin <anders.e.e.wallin@gmail.com>" CACHE STRING "email")
-set(CPACK_PACKAGE_NAME "truetyeptracer" CACHE STRING "name")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "C++ port with python bindings of true-type-tracer" CACHE STRING "name")
-set(CPACK_PACKAGE_VENDOR https://github.com/aewallin/truetype-tracer)
-set(CPACK_DEBIAN_PACKAGE_SECTION "science" CACHE STRING "name")
-set(CPACK_DEBIAN_BUILD_DEPENDS debhelper python libboost-dev libboost-python-dev libfreetype6 libfreetype6-dev git  cmake  CACHE STRINGS "name")
-set(CPACK_DEBIAN_PACKAGE_DEPENDS python git libboost-python libfreetype6 cmake  CACHE STRING "name")
-set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE ${DEB_ARCHITECTURE} CACHE STRING "name")
-set(CPACK_DEBIAN_PACKAGE_PRIORITY optional CACHE STRING "name")
-SET(CPACK_PACKAGE_VERSION ${MY_VERSION} CACHE STRING "name")
-set(CPACK_DEBIAN_DISTRIBUTION_NAME ubuntu CACHE STRING "name")
-set(CPACK_DEBIAN_DISTRIBUTION_RELEASES oneiric CACHE STRING "name") 
-message(STATUS " CMAKE_SOURCE_DIR is = " ${CMAKE_SOURCE_DIR})
-set(CPACK_PACKAGE_DESCRIPTION_FILE ${CMAKE_SOURCE_DIR}/deb/debian_package_description.txt CACHE STRING "package description file")
-set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/deb/debian_copyright.txt CACHE STRING "name")
-set(CPACK_DEBIAN_CHANGELOG "  * Latest development version." CACHE STRING "name")
-set(DEB_SRC_DIR ${CMAKE_SOURCE_DIR} CACHE STRING "name" )
+include(package_details.cmake)
 
 # run the source package generation as a target, so we don't have to do it every time
 add_custom_target(spackage 
-              ${CMAKE_COMMAND} -C ${CMAKE_BINARY_DIR}/CMakeCache.txt
+              ${CMAKE_COMMAND} -D SRC_DIR:STRING=${CMAKE_SOURCE_DIR} -D MY_VERSION:STRING=${MY_VERSION} -C ${CMAKE_SOURCE_DIR}/package_details.cmake
               -P ${CMAKE_CURRENT_SOURCE_DIR}/deb/DebSourcePPA.cmake 
-              # WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+              #ERROR_QUIET # WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             ) # get the changes file as an output from here?
-
+# -C ${CMAKE_BINARY_DIR}/CMakeCache.txt
 include(CPack) # this should be last
