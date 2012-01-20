@@ -34,6 +34,11 @@ include_directories(${FREETYPE_INCLUDE_DIRS})
 # include the output directory, where the version_string.hpp file is generated
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 INCLUDE(version_string.cmake)
+# we can now parse the git-commit-id:
+STRING(REGEX REPLACE "([0-9][0-9]).*" "\\1" GIT_MAJOR_VERSION "${GIT_COMMIT_ID}" )
+STRING(REGEX REPLACE "[0-9][0-9].([0-9][0-9])-.*" "\\1" GIT_MINOR_VERSION "${GIT_COMMIT_ID}" )
+STRING(REGEX REPLACE "[0-9][0-9].[0-9][0-9]-(.*)-.*" "\\1" GIT_PATCH_VERSION "${GIT_COMMIT_ID}" )
+SET(MY_VERSION "${GIT_MAJOR_VERSION}.${GIT_MINOR_VERSION}.${GIT_PATCH_VERSION}" CACHE STRING "name")
 
 
 # this makes the Python module
@@ -43,11 +48,9 @@ add_library(
     ttt.cpp
     ttt_py.cpp
 )
-add_dependencies( 
-    ttt
-    version_string 
-)
+
 set_target_properties(ttt PROPERTIES PREFIX "") 
+set_target_properties(ttt PROPERTIES VERSION ${MY_VERSION}) 
 target_link_libraries(ttt ${Boost_LIBRARIES} ${FREETYPE_LIBRARY}) 
 
 #
@@ -82,14 +85,7 @@ execute_process(
 )
 
 
-#message( STATUS " git commit id: " ${GIT_COMMIT_ID})
-# parse the commit id to get major, minor, patch
-STRING(REGEX REPLACE "([0-9][0-9]).*" "\\1" GIT_MAJOR_VERSION "${GIT_COMMIT_ID}" )
-#MESSAGE(STATUS "result= ${GIT_MAJOR_VERSION}")
-STRING(REGEX REPLACE "[0-9][0-9].([0-9][0-9])-.*" "\\1" GIT_MINOR_VERSION "${GIT_COMMIT_ID}" )
-#MESSAGE(STATUS "result= ${GIT_MINOR_VERSION}")
-STRING(REGEX REPLACE "[0-9][0-9].[0-9][0-9]-(.*)-.*" "\\1" GIT_PATCH_VERSION "${GIT_COMMIT_ID}" )
-#MESSAGE(STATUS "result= ${GIT_PATCH_VERSION}")
+
 
 set(CPACK_GENERATOR "DEB")
 set(CPACK_PACKAGE_CONTACT "Anders Wallin <anders.e.e.wallin@gmail.com>" CACHE STRING "email")
@@ -101,11 +97,8 @@ set(CPACK_DEBIAN_BUILD_DEPENDS debhelper python libboost-dev libboost-python-dev
 set(CPACK_DEBIAN_PACKAGE_DEPENDS python git libboost-python libfreetype cmake  CACHE STRING "name")
 set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE ${DEB_ARCHITECTURE} CACHE STRING "name")
 set(CPACK_DEBIAN_PACKAGE_PRIORITY optional CACHE STRING "name")
-SET(CPACK_PACKAGE_VERSION "${GIT_MAJOR_VERSION}.${GIT_MINOR_VERSION}.${GIT_PATCH_VERSION}" CACHE STRING "name")
-
-set_target_properties(ttt PROPERTIES VERSION ${CPACK_PACKAGE_VERSION}) 
-
-set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}" CACHE STRING "name")
+SET(CPACK_PACKAGE_VERSION ${MY_VERSION} CACHE STRING "name")
+#set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}" CACHE STRING "name")
 set(CPACK_DEBIAN_DISTRIBUTION_NAME ubuntu CACHE STRING "name")
 set(CPACK_DEBIAN_DISTRIBUTION_RELEASES oneiric CACHE STRING "name") 
 set(CPACK_PACKAGE_DESCRIPTION_FILE ${CMAKE_SOURCE_DIR}/debian/debian_package_description.txt CACHE STRING "${CPACK_PACKAGE_DESCRIPTION_FILE}")
