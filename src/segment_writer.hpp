@@ -8,7 +8,7 @@ namespace bp = boost::python;
 // used for testing OpenVoronoi.
 class SEG_Writer : public Writer {
 public:
-    SEG_Writer() {
+    SEG_Writer() : Writer() {
         has_arc(false);
         has_cubic(false);
         has_conic(false);

@@ -17,14 +17,14 @@
 class NGC_Writer : public Writer {
 public:
     NGC_Writer() 
-        :   unicode(false),  bd(false) {
+        :   Writer(), unicode(false),  bd(false) {
             has_arc(true);
             has_conic(true);
             has_cubic(true);
             set_scale(0.0003);
     }
     NGC_Writer(  bool unicode, double scale, bool blockdelete = false ) 
-        :   unicode(unicode),  bd(blockdelete) {
+        :   Writer(), unicode(unicode),  bd(blockdelete) {
             has_arc(true);
             has_conic(true);
             has_cubic(true);
@@ -126,14 +126,10 @@ public:
         else
             std::cout << "G2 X[" << p2.x << "*#3+#5] Y["<< p2.y  << "*#3+#6] R["<< gr <<"*#3]\n";
     }
-    //double get_scale() {return scale;}
-    //void set_scale(double s) {scale = s;}
+
     bool get_blockdelete() {return bd;}
     void set_blockdelete(bool b) {bd = b;}
 private:
-    
-    //double scale;
     bool bd; // blockdelete
-
     bool unicode;
 };
