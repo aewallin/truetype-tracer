@@ -8,6 +8,8 @@ set(CPACK_PACKAGE_NAME "truetypetracer" CACHE STRING "name")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "C++ port with python bindings of true-type-tracer" CACHE STRING "name2")
 set(CPACK_PACKAGE_VENDOR https://github.com/aewallin/truetype-tracer CACHE STRING "web")
 set(CPACK_DEBIAN_PACKAGE_SECTION "science" CACHE STRING "name3")
+
+# these are dependencies required to build & run. they should work with launchpad or pbuilder also.
 set(DEBSRC_BUILD_DEPENDS debhelper python libboost-dev libboost-python-dev libfreetype6 libfreetype6-dev git  cmake  CACHE STRING "name4")
 set(DEBSRC_PACKAGE_DEPENDS python git "libboost-python (>= 1.40)" libfreetype6 cmake  CACHE STRING "name5")
 
