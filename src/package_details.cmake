@@ -9,7 +9,7 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "C++ port with python bindings of true-typ
 set(CPACK_PACKAGE_VENDOR https://github.com/aewallin/truetype-tracer CACHE STRING "web")
 set(CPACK_DEBIAN_PACKAGE_SECTION "science" CACHE STRING "name3")
 set(DEBSRC_BUILD_DEPENDS debhelper python libboost-dev libboost-python-dev libfreetype6 libfreetype6-dev git  cmake  CACHE STRING "name4")
-set(DEBSRC_PACKAGE_DEPENDS python git libboost-python libfreetype6 cmake  CACHE STRING "name5")
+set(DEBSRC_PACKAGE_DEPENDS python git "libboost-python (> = 1.40.0)" libfreetype6 cmake  CACHE STRING "name5")
 
 # however CPack wants dependencies as a single comma separated string!
 set(CPACK_DEBIAN_PACKAGE_DEPENDS)
