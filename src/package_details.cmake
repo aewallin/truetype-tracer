@@ -4,11 +4,13 @@ message(STATUS " called with version  = " ${MY_VERSION})
 
 set(CPACK_GENERATOR "DEB" CACHE string "generator" )
 set(CPACK_PACKAGE_CONTACT "Anders Wallin <anders.e.e.wallin@gmail.com>" CACHE STRING "email")
-set(CPACK_PACKAGE_NAME "truetyeptracer" CACHE STRING "name")
+set(CPACK_PACKAGE_NAME "truetypetracer" CACHE STRING "name")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "C++ port with python bindings of true-type-tracer" CACHE STRING "name2")
 set(CPACK_PACKAGE_VENDOR https://github.com/aewallin/truetype-tracer CACHE STRING "web")
 set(CPACK_DEBIAN_PACKAGE_SECTION "science" CACHE STRING "name3")
-set(CPACK_DEBIAN_BUILD_DEPENDS debhelper python libboost-dev libboost-python-dev libfreetype6 libfreetype6-dev git  cmake  CACHE STRING "name4")
+
+# these are dependencies required to build & run. they should work with launchpad or pbuilder also.
+set(DEBSRC_BUILD_DEPENDS debhelper python libboost-dev libboost-python-dev libfreetype6 libfreetype6-dev git  cmake  CACHE STRING "name4")
 
 # we need to explicitly list the libboost-python versions here. why??
 # precise has 1.48.0
@@ -19,11 +21,24 @@ set(DEBSRC_PACKAGE_DEPENDS python git cmake
                 "libboost-python1.48.0 | libboost-python1.46.1 | libboost-python1.42.0 | libboost-python1.40.0"
                 libfreetype6 CACHE STRING "name")
 
+# however CPack wants dependencies as a single comma separated string!
+set(CPACK_DEBIAN_PACKAGE_DEPENDS)
+foreach(DEP ${DEBSRC_PACKAGE_DEPENDS})
+    set(CPACK_DEBIAN_PACKAGE_DEPEND "${CPACK_DEBIAN_PACKAGE_DEPENDS}, ${DEP}")
+endforeach(DEP ${DEBSRC_PACKAGE_DEPENDS})  
+
+set(CPACK_DEBIAN_BUILD_DEPENDS)
+foreach(DEP ${DEBSRC_BUILD_DEPENDS})
+    set(CPACK_DEBIAN_BUILD_DEPENDS "${CPACK_DEBIAN_BUILD_DEPENDS}, ${DEP}")
+endforeach(DEP ${DEBSRC_BUILD_DEPENDS})  
+
+
 set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE ${DEB_ARCHITECTURE} CACHE STRING "name6")
 set(CPACK_DEBIAN_PACKAGE_PRIORITY optional CACHE STRING "name7")
 SET(CPACK_PACKAGE_VERSION ${MY_VERSION} CACHE STRING "name8")
 set(CPACK_DEBIAN_DISTRIBUTION_NAME ubuntu CACHE STRING "name9")
-set(CPACK_DEBIAN_DISTRIBUTION_RELEASES lucid maverick natty oneiric CACHE STRING "name10") 
+set(CPACK_DEBIAN_DISTRIBUTION_RELEASES lucid maverick natty oneiric precise CACHE STRING "name10") 
+#set(CPACK_DEBIAN_DISTRIBUTION_RELEASES natty CACHE STRING "name10") 
 message(STATUS " CMAKE_SOURCE_DIR is = " ${CMAKE_SOURCE_DIR})
 if(${SRC_DIR} MATCHES "")
     set(CPACK_PACKAGE_DESCRIPTION_FILE ${SRC_DIR}/deb/debian_package_description.txt CACHE STRING "package description file")

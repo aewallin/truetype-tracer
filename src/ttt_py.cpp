@@ -75,6 +75,10 @@ BOOST_PYTHON_MODULE(ttt) {
         .add_property("conic", &Writer::get_conic, &Writer::set_conic)
         .add_property("cubic", &Writer::get_cubic, &Writer::set_cubic)
         .add_property("scale", &Writer::get_scale, &Writer::set_scale)
+        .add_property("conic_biarc_subdivision", &Writer::get_conic_biarc_subdiv, &Writer::set_conic_biarc_subdiv)
+        .add_property("conic_line_subdivision", &Writer::get_conic_line_subdiv, &Writer::set_conic_line_subdiv)
+        .add_property("cubic_biarc_subdivision", &Writer::get_cubic_biarc_subdiv, &Writer::set_cubic_biarc_subdiv)
+        .add_property("cubic_line_subdivision", &Writer::get_cubic_line_subdiv, &Writer::set_cubic_line_subdiv)
         .add_property("extents", &Writer::get_extents)
     ;
     bp::class_< NGC_Writer, bp::bases<Writer> >("NGC_Writer")

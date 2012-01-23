@@ -120,6 +120,60 @@ long int Ttt::render_char(FT_Face face, wchar_t c, long int offset, int linescal
     return face->glyph->advance.x;
 }
 
+// FIXME: the zigzag 'infill' is completely untested
+void Ttt::my_draw_bitmap(FT_Bitmap *b, FT_Int x, FT_Int y, int linescale) {
+    // FT_Int i, j;
+    static int oldbit; // ?
+    FT_Vector oldv = {99999,0};
+    FT_Vector vbuf[100]; //freetype says no more than 32 ever?
+    int spans = 0;
+    int pitch = abs(b->pitch);
+    static int odd=0; //?
+    
+    for(FT_Int j = 0; j < b->rows; j++) {
+        FT_Vector v;
+        oldbit = 0;
+        spans = 0;
+        for(FT_Int i = 0; i < pitch; i++) {
+            unsigned char byte = b->buffer[j * pitch + i], mask, bits;
+            for(bits = 0, mask = 0x80; mask; bits++, mask >>= 1) {
+                unsigned char bit = byte & mask;
+                v.x = i*8+bits+x;
+                v.y = (y-j)*64*64/linescale-64*32/linescale;
+                if(!oldbit && bit) {
+                    v.x += 8;
+                    oldv = v;
+                    vbuf[spans++] = v;
+                }
+                if(oldbit && !bit) {
+                    v.x -= 8;
+                    if(oldv.x < v.x) {
+                        vbuf[spans++] = v;
+                    } else spans--;
+                }
+                oldbit = bit;
+            }
+        }
+        if(oldbit) {
+            v.x -= 8;
+            vbuf[spans++] = v;
+        }
+        odd = !odd;
+        spans /= 2;
+        if(odd) {
+            for (FT_Int i=spans-1; i>=0; i--) {
+                my_move_to(vbuf+1+(i*2), (void*)1);
+                my_line_to(vbuf+(i*2), (void*)1);
+            }
+        } else {
+            for (FT_Int i=0; i<spans; i++) {
+                my_move_to(vbuf+(i*2), (void*)1);
+                my_line_to(vbuf+1+(i*2), (void*)1);
+            }
+        }
+    }
+}
+
 // move with 'pen up' to a new position and then put 'pen down' 
 int Ttt::my_move_to( const FT_Vector* to, void* user ) {
     P pt(to);
@@ -180,7 +234,7 @@ int Ttt::my_conic_as_biarcs( const FT_Vector* control, const FT_Vector* to, void
     extents ext;
     boost::tie(len,ext) = conic_length(control,to);
     glyph_extents.add_extents(ext);
-    double dsteps = 200; 
+    double dsteps = my_writer->get_conic_biarc_subdiv(); //200; 
     int steps = (int) std::max( (double)2, (double)len/(double)dsteps); // number of biarcs, minimum two
     
     P p0( &last_point );
@@ -212,7 +266,7 @@ int Ttt::my_conic_as_lines(const FT_Vector* control, const  FT_Vector* to, void*
     extents ext;
     boost::tie(len,ext) = conic_length(control,to);
     glyph_extents.add_extents(ext);
-    double dsteps = 200; // FIXME: get this from Writer? here we use the same value as for biarcs? is that OK?
+    double dsteps = my_writer->get_conic_line_subdiv(); // FIXME: get this from Writer? here we use the same value as for biarcs? is that OK?
     int steps = (int) std::max( (double)2, (double)len/(double)dsteps); // number of line-segments
     my_writer->conic_as_lines_comment(steps);
     for(int t=1; t<=steps; t++) {
@@ -281,7 +335,7 @@ int Ttt::my_cubic_as_biarcs(const FT_Vector* control1,
     // define the subdivision of curves into arcs: approximate curve length
     // in font coordinates to get one arc pair (minimum of two arc pairs
     // per curve)
-    double dsteps=200; // FIXME: get this from Writer!?
+    double dsteps=my_writer->get_cubic_biarc_subdiv(); // FIXME: get this from Writer!?
 
     int steps = (int) std::max( (double)2, len/dsteps); // at least two steps
 
@@ -316,7 +370,7 @@ int Ttt::my_cubic_as_lines(const FT_Vector* control1, const FT_Vector* control2,
     extents ext;
     boost::tie(len,ext) = cubic_length(control1,control2,to);
     glyph_extents.add_extents(ext);
-    double dsteps=200; // get this from writer!
+    double dsteps=my_writer->get_cubic_line_subdiv(); 
     int steps = (int) std::max( (double)2, len/dsteps); // at least two steps
     for(int t=1; t<=steps; t++) {
         double tf = (double)t/(double)steps;
@@ -406,57 +460,5 @@ void Ttt::biarc(P p0, P ts, P p4, P te, double r) {
     arc(p2, p4, tm); // arc from p2 to p4
 }
 
-// FIXME: the zigzag 'infill' is completely untested
-void Ttt::my_draw_bitmap(FT_Bitmap *b, FT_Int x, FT_Int y, int linescale) {
-    // FT_Int i, j;
-    static int oldbit; // ?
-    FT_Vector oldv = {99999,0};
-    FT_Vector vbuf[100]; //freetype says no more than 32 ever?
-    int spans = 0;
-    int pitch = abs(b->pitch);
-    static int odd=0; //?
-    
-    for(FT_Int j = 0; j < b->rows; j++) {
-        FT_Vector v;
-        oldbit = 0;
-        spans = 0;
-        for(FT_Int i = 0; i < pitch; i++) {
-            unsigned char byte = b->buffer[j * pitch + i], mask, bits;
-            for(bits = 0, mask = 0x80; mask; bits++, mask >>= 1) {
-                unsigned char bit = byte & mask;
-                v.x = i*8+bits+x;
-                v.y = (y-j)*64*64/linescale-64*32/linescale;
-                if(!oldbit && bit) {
-                    v.x += 8;
-                    oldv = v;
-                    vbuf[spans++] = v;
-                }
-                if(oldbit && !bit) {
-                    v.x -= 8;
-                    if(oldv.x < v.x) {
-                        vbuf[spans++] = v;
-                    } else spans--;
-                }
-                oldbit = bit;
-            }
-        }
-        if(oldbit) {
-            v.x -= 8;
-            vbuf[spans++] = v;
-        }
-        odd = !odd;
-        spans /= 2;
-        if(odd) {
-            for (FT_Int i=spans-1; i>=0; i--) {
-                my_move_to(vbuf+1+(i*2), (void*)1);
-                my_line_to(vbuf+(i*2), (void*)1);
-            }
-        } else {
-            for (FT_Int i=0; i<spans; i++) {
-                my_move_to(vbuf+(i*2), (void*)1);
-                my_line_to(vbuf+1+(i*2), (void*)1);
-            }
-        }
-    }
-}
+
  

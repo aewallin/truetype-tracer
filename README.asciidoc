@@ -1,0 +1,48 @@
+True-type tracer
+================
+// see http://powerman.name/doc/asciidoc
+
+// True-type tracer
+// ----------------
+
+Experimental C++ port, with python bindings, of True-type tracer, 
+forked from Chris Radek's site at http://timeguy.com/cradek/01276453959
+Original git repo at git://timeguy.com/truetype-tracer.git
+
+Uses FreeType to produce font-outline geometry in various output formats such as: 
+
+- G-code
+- DXF (broken, see To-Do list)
+
+Dependencies: git, cmake, FreeType, boost-python.
+
+
+
+.Installation from PPA
+----
+$ sudo add-apt-repository ppa:anders-e-e-wallin/cam
+$ sudo apt-get update
+$ sudo apt-get install truetypetracer
+----
+
+.Installation from source
+----
+$ git clone https://aewallin@github.com/aewallin/truetype-tracer.git
+$ cd truetype-tracer
+$ mkdir build
+$ cd build
+$ cmake ../src
+$ make
+$ sudo make install
+----
+
+.To-Do
+* Make it possible to change the font.
+* Auto-scale output to be of certain width/height.
+* DXF_Writer: Make DXF output work.
+* SVG output? (write a new class SVG_Writer)
+* NGC_Writer:
+** make variables optional, for controllers that don't have LinuxCNC-like variables
+** make number of digits afer decimal point adjustable
+* Fix build-problems on Ubuntu 10.04LTS Lucid
+
