@@ -9,7 +9,16 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "C++ port with python bindings of true-typ
 set(CPACK_PACKAGE_VENDOR https://github.com/aewallin/truetype-tracer CACHE STRING "web")
 set(CPACK_DEBIAN_PACKAGE_SECTION "science" CACHE STRING "name3")
 set(CPACK_DEBIAN_BUILD_DEPENDS debhelper python libboost-dev libboost-python-dev libfreetype6 libfreetype6-dev git  cmake  CACHE STRING "name4")
-set(CPACK_DEBIAN_PACKAGE_DEPENDS python git libboost-python libfreetype6 cmake  CACHE STRING "name5")
+
+# we need to explicitly list the libboost-python versions here. why??
+# precise has 1.48.0
+# oneiric has 1.46.1
+# natty/maverick has 1.42.0
+# lucid has 1.40.0
+set(DEBSRC_PACKAGE_DEPENDS python git cmake 
+                "libboost-python1.48.0 | libboost-python1.46.1 | libboost-python1.42.0 | libboost-python1.40.0"
+                libfreetype6 CACHE STRING "name")
+
 set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE ${DEB_ARCHITECTURE} CACHE STRING "name6")
 set(CPACK_DEBIAN_PACKAGE_PRIORITY optional CACHE STRING "name7")
 SET(CPACK_PACKAGE_VERSION ${MY_VERSION} CACHE STRING "name8")
