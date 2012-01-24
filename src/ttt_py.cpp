@@ -12,7 +12,8 @@ namespace bp = boost::python;
 #include "version_string.hpp"
 
 // this is the default font used if not specified on commandline
-#define TTFONT "/usr/share/fonts/truetype/freefont/FreeSerifBoldItalic.ttf"
+// #define TTFONT "/usr/share/fonts/truetype/freefont/FreeSerifBoldItalic.ttf"
+#define TTFONT "/usr/share/fonts/truetype/freefont/FreeSerif.ttf"
 
 std::string version() {
     return VERSION_STRING;
