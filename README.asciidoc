@@ -44,5 +44,4 @@ $ sudo make install
 * NGC_Writer:
 ** make variables optional, for controllers that don't have LinuxCNC-like variables
 ** make number of digits afer decimal point adjustable
-* Fix build-problems on Ubuntu 10.04LTS Lucid
-
+* Use Kerning to avoid overlapping characters. See http://www.freetype.org/freetype2/docs/tutorial/step2.html
