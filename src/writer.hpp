@@ -15,6 +15,7 @@ public:
         _conic_line_subdiv = 200;
         _cubic_biarc_subdiv = 200;
         _cubic_line_subdiv = 200;
+        scale = 1;
     }
     virtual bool has_arc() const {return _arc;} 
     virtual bool has_arc(bool b) {_arc=b;}

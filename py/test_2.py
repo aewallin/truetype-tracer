@@ -3,7 +3,7 @@ import ttt
 #wr = ttt.NGC_Writer()
 wr = ttt.SEG_Writer()
 
-# wr.scale = 3
+# wr.scale = 1
 wr.arc = False
 wr.conic = False
 wr.cubic = False
