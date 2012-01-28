@@ -11,3 +11,9 @@ s3 = ttt.ttt("LT",wr)
 print s3
 s = wr.get_segments()
 print s
+e = wr.extents
+print e
+print e.maxx
+print e.minx
+print e.maxy
+print e.miny

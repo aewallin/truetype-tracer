@@ -70,7 +70,12 @@ BOOST_PYTHON_MODULE(ttt) {
     bp::def("dxf", dxf0);
     
     bp::def("ttt", ttt_with_writer);
-    
+    bp::class_<extents>("extents")
+        .add_property("minx", &extents::minx)
+        .add_property("miny", &extents::miny)
+        .add_property("maxy", &extents::maxy)
+        .add_property("maxx", &extents::maxx)
+    ;
     bp::class_<Writer>("Writer")
         .add_property("arc", &Writer::get_arc, &Writer::set_arc)
         .add_property("conic", &Writer::get_conic, &Writer::set_conic)
@@ -84,7 +89,6 @@ BOOST_PYTHON_MODULE(ttt) {
     ;
     bp::class_< NGC_Writer, bp::bases<Writer> >("NGC_Writer")
         .add_property("blockdelete", &NGC_Writer::get_blockdelete, &NGC_Writer::set_blockdelete)
-        
     ;
     bp::class_< SEG_Writer, bp::bases<Writer> >("SEG_Writer")
         .def( "get_segments", &SEG_Writer::get_segments)

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <boost/python.hpp>
-namespace bp = boost::python;
 #include "extents.hpp"
 
 // this is a base-class for Writers.
@@ -41,13 +39,8 @@ public:
     void set_scale(double s) {scale = s;}
     double get_scale() const { return scale; }
     
-    bp::list get_extents() {
-        bp::list l;
-        l.append(ext.minx);
-        l.append(ext.maxx);
-        l.append(ext.miny);
-        l.append(ext.maxy);
-        return l;
+    extents get_extents() {
+        return ext;
     }
     void set_extents(extents e) {
         ext=e;
