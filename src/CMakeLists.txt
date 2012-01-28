@@ -96,9 +96,10 @@ add_library(
     SHARED
     ${TTT_SRC_FILES}
 )
-
 set_target_properties(libttt PROPERTIES PREFIX "") 
 set_target_properties(libttt PROPERTIES VERSION ${MY_VERSION}) 
+target_link_libraries(libttt ${FREETYPE_LIBRARY}) # no need to link with boost-python here.
+
 install(
     TARGETS libttt
     LIBRARY 
