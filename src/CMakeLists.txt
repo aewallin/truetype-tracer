@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
  
-Project(ttt5)
+Project(ttt)
  
 # this figures out the Python include directories and adds them to the
 # header file search path
@@ -40,13 +40,26 @@ STRING(REGEX REPLACE "[0-9][0-9].([0-9][0-9])-.*" "\\1" GIT_MINOR_VERSION "${GIT
 STRING(REGEX REPLACE "[0-9][0-9].[0-9][0-9]-(.*)-.*" "\\1" GIT_PATCH_VERSION "${GIT_COMMIT_ID}" )
 SET(MY_VERSION "${GIT_MAJOR_VERSION}.${GIT_MINOR_VERSION}.${GIT_PATCH_VERSION}" CACHE STRING "name")
 
+set(TTT_SRC_FILES
+    ttt.cpp
+)
 
+set(TTT_INCLUDE_FILES
+    ttt.hpp
+    p.hpp
+    ngc_writer.hpp
+    extents.hpp
+    dxf_writer.hpp
+    writer.hpp
+)
+
+########################################################################
 # this makes the Python module
 add_library(
     ttt
     MODULE
-    ttt.cpp
-    ttt_py.cpp
+    ${TTT_SRC_FILES}
+    ttt_py.cpp # the boost-python bindings are here.
 )
 
 set_target_properties(ttt PROPERTIES PREFIX "") 
@@ -76,6 +89,41 @@ install(
     LIBRARY DESTINATION ${Python_site_packages}
 )
 
+########################################################################
+# the c++ shared library
+add_library(
+    libttt
+    SHARED
+    ${TTT_SRC_FILES}
+)
+
+set_target_properties(libttt PROPERTIES PREFIX "") 
+set_target_properties(libttt PROPERTIES VERSION ${MY_VERSION}) 
+install(
+    TARGETS libttt
+    LIBRARY 
+    DESTINATION lib/ttt
+    ARCHIVE DESTINATION lib/ttt
+    PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+)
+
+# this installs the c++ include headers
+install(
+    FILES ${TTT_INCLUDE_FILES}
+    DESTINATION include/ttt
+    PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
+)
+
+########################################################################
+# install readme and example(s)
+# 'other' documentation files
+set(DOC_FILES ${CMAKE_SOURCE_DIR}/../README.asciidoc ${CMAKE_SOURCE_DIR}/../LICENSE.txt)
+set(DOC_PATH "share/doc/ttt")
+install(FILES ${DOC_FILES}
+        DESTINATION ${DOC_PATH}
+)
+
+########################################################################
 # "make package" stuff
  
 execute_process(
@@ -88,7 +136,12 @@ include(package_details.cmake)
 
 # "make spackage" will build a source package
 add_custom_target(spackage 
-              ${CMAKE_COMMAND} -D SRC_DIR:STRING=${CMAKE_SOURCE_DIR} -D MY_VERSION:STRING=${MY_VERSION} -C ${CMAKE_SOURCE_DIR}/package_details.cmake
+              ${CMAKE_COMMAND} 
+              -D SRC_DIR:STRING=${CMAKE_SOURCE_DIR} 
+              -D MY_VERSION:STRING=${MY_VERSION} 
+              -C ${CMAKE_SOURCE_DIR}/package_details.cmake
               -P ${CMAKE_CURRENT_SOURCE_DIR}/deb/DebSourcePPA.cmake 
             ) 
+            
+# "make package" builds a binary debian package
 include(CPack) # this should be last

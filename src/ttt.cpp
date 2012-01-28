@@ -5,8 +5,6 @@
 #include <boost/tuple/tuple.hpp> // for tie()
 
 #include "ttt.hpp"
-#include "p.hpp"
-#include "ngc_writer.hpp"
 
 void handle_ft_error(std::string where, int f, int x) {
     const struct ftError *e = &ft_errors[0];
