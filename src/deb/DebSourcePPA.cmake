@@ -67,28 +67,39 @@ set(DEBIAN_SOURCE_ORIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/Debian/${CPACK_DEBIAN_PA
 MESSAGE(STATUS "Debian package source-orig-dir: " ${DEBIAN_SOURCE_ORIG_DIR})
 
 # copy of source
-if( CPACK_DEBIAN_PACKAGE_SOURCE_COPY )
-  execute_process(COMMAND ${CPACK_DEBIAN_PACKAGE_SOURCE_COPY} "${CMAKE_SOURCE_DIR}" "${DEBIAN_SOURCE_ORIG_DIR}.orig")
-else( CPACK_DEBIAN_PACKAGE_SOURCE_COPY )
-  MESSAGE(STATUS "Copying files from ${DEB_SRC_DIR} to ${DEBIAN_SOURCE_ORIG_DIR}.orig")
-  execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${DEB_SRC_DIR} "${DEBIAN_SOURCE_ORIG_DIR}.orig")
-  # create a git_tag.txt file
-    MESSAGE(STATUS "Writing git-tag.txt")
-    execute_process(
-        COMMAND ${GIT_EXECUTABLE} describe --tags 
-        RESULT_VARIABLE res_var 
-        OUTPUT_VARIABLE GIT_COM_ID 
-    )
-    string( REPLACE "\n" "" GIT_COMMIT_ID ${GIT_COM_ID} )
-    file(WRITE "${DEBIAN_SOURCE_ORIG_DIR}.orig/git-tag.txt" ${GIT_COMMIT_ID} )
+#if( CPACK_DEBIAN_PACKAGE_SOURCE_COPY )
+#  execute_process(COMMAND ${CPACK_DEBIAN_PACKAGE_SOURCE_COPY} "${CMAKE_SOURCE_DIR}" "${DEBIAN_SOURCE_ORIG_DIR}.orig")
+#else( CPACK_DEBIAN_PACKAGE_SOURCE_COPY )
 
-endif( CPACK_DEBIAN_PACKAGE_SOURCE_COPY )
+MESSAGE(STATUS "cmake source dir:   ${CMAKE_SOURCE_DIR}")
+MESSAGE(STATUS "cmake curr source dir:   ${CMAKE_CURRENT_SOURCE_DIR}")
+MESSAGE(STATUS "deb source dir:   ${DEB_SRC_DIR}")
+
+foreach(CPY_DIR ${DEB_CPY_DIRS} )
+  #STRING(REGEX REPLACE "/(.*)$" "\\1" CPY_DIR "${CPY_DIR}" ) # strip away leading /
+
+  MESSAGE(STATUS "Copying files from ${CPY_DIR} to ${DEBIAN_SOURCE_ORIG_DIR}.orig")
+  file(MAKE_DIRECTORY "${DEBIAN_SOURCE_ORIG_DIR}.orig/${CPY_DIR}")
+  execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${DEB_SRC_DIR}/../${CPY_DIR} ${DEBIAN_SOURCE_ORIG_DIR}.orig/${CPY_DIR})
+endforeach(CPY_DIR ${DEB_CPY_DIRS})
+
+# create a git_tag.txt file
+MESSAGE(STATUS "Writing git-tag.txt to ${DEBIAN_SOURCE_ORIG_DIR}.orig/src/git-tag.txt")
+execute_process(
+    COMMAND ${GIT_EXECUTABLE} describe --tags 
+    RESULT_VARIABLE res_var 
+    OUTPUT_VARIABLE GIT_COM_ID 
+)
+string( REPLACE "\n" "" GIT_COMMIT_ID ${GIT_COM_ID} )
+file(WRITE "${DEBIAN_SOURCE_ORIG_DIR}.orig/src/git-tag.txt" ${GIT_COMMIT_ID} )
+
+#endif( CPACK_DEBIAN_PACKAGE_SOURCE_COPY )
 
 # remove unnecessary folders
-foreach(REMOVE_DIR ${CPACK_DEBIAN_PACKAGE_REMOVE_SOURCE_FILES})
-    MESSAGE(STATUS "Removing direcotry from source-orig-dir. " ${REMOVE_DIR})
-  file(REMOVE_RECURSE ${DEBIAN_SOURCE_ORIG_DIR}.orig/${REMOVE_DIR})
-endforeach()
+#foreach(REMOVE_DIR ${CPACK_DEBIAN_PACKAGE_REMOVE_SOURCE_FILES})
+#    MESSAGE(STATUS "Removing direcotry from source-orig-dir. " ${REMOVE_DIR})
+#  file(REMOVE_RECURSE ${DEBIAN_SOURCE_ORIG_DIR}.orig/${REMOVE_DIR})
+#endforeach()
 
 MESSAGE(STATUS "Creating source tar " )
 # create the original source tar
@@ -182,7 +193,7 @@ foreach(RELEASE ${CPACK_DEBIAN_DISTRIBUTION_RELEASES})
     "\n"
     "build:\n"
     "	mkdir $(BUILDDIR)\n"
-    "	cd $(BUILDDIR); cmake -DCMAKE_BUILD_TYPE=Release -DOPT_BIN_SUFFIX=ON -DBASH_COMPLETION_DIR=../etc/bash_completion.d -DCMAKE_INSTALL_PREFIX=/usr ..\n"
+    "	cd $(BUILDDIR); cmake -DCMAKE_BUILD_TYPE=Release -DOPT_BIN_SUFFIX=ON -DBASH_COMPLETION_DIR=../etc/bash_completion.d -DCMAKE_INSTALL_PREFIX=/usr ../src\n"
     "	$(MAKE) -C $(BUILDDIR) preinstall\n"
     "	touch build\n"
     "\n"

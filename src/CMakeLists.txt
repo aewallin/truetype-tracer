@@ -118,11 +118,11 @@ install(
 ########################################################################
 # install readme and example(s)
 # 'other' documentation files
-set(DOC_FILES ${CMAKE_SOURCE_DIR}/../README.asciidoc ${CMAKE_SOURCE_DIR}/../LICENSE.txt)
-set(DOC_PATH "share/doc/ttt")
-install(FILES ${DOC_FILES}
-        DESTINATION ${DOC_PATH}
-)
+#set(DOC_FILES ${CMAKE_SOURCE_DIR}/../README.asciidoc ${CMAKE_SOURCE_DIR}/../LICENSE.txt)
+#set(DOC_PATH "share/doc/ttt")
+#install(FILES ${DOC_FILES}
+#        DESTINATION ${DOC_PATH}
+#)
 
 ########################################################################
 # "make package" stuff

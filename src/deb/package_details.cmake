@@ -37,17 +37,27 @@ set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE ${DEB_ARCHITECTURE} CACHE STRING "name6")
 set(CPACK_DEBIAN_PACKAGE_PRIORITY optional CACHE STRING "name7")
 SET(CPACK_PACKAGE_VERSION ${MY_VERSION} CACHE STRING "name8")
 set(CPACK_DEBIAN_DISTRIBUTION_NAME ubuntu CACHE STRING "name9")
-#set(CPACK_DEBIAN_DISTRIBUTION_RELEASES lucid maverick natty oneiric precise CACHE STRING "name10") 
-set(CPACK_DEBIAN_DISTRIBUTION_RELEASES oneiric CACHE STRING "name10") 
+set(CPACK_DEBIAN_DISTRIBUTION_RELEASES lucid maverick natty oneiric precise CACHE STRING "name10") 
+#set(CPACK_DEBIAN_DISTRIBUTION_RELEASES oneiric CACHE STRING "name10") 
 message(STATUS "package_details.cmake  CMAKE_SOURCE_DIR is = " ${CMAKE_SOURCE_DIR})
 if(${SRC_DIR} MATCHES "")
     set(CPACK_PACKAGE_DESCRIPTION_FILE ${SRC_DIR}/deb/debian_package_description.txt CACHE STRING "package description file")
     set(CPACK_RESOURCE_FILE_LICENSE ${SRC_DIR}/deb/debian_copyright.txt CACHE STRING "name11")
     set(DEB_SRC_DIR ${SRC_DIR} CACHE STRING "name13" )
+    set(DEB_CPY_DIRS  # these are relative to DEB_SRC_DIR/..
+        src
+        py
+        cpp
+        CACHE STRING "dirs to copy"
+    )
 else(${SRC_DIR} MATCHES "")
     set(CPACK_PACKAGE_DESCRIPTION_FILE ${CMAKE_SOURCE_DIR}/deb/debian_package_description.txt CACHE STRING "package description file")
     set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/deb/debian_copyright.txt CACHE STRING "name11")
     set(DEB_SRC_DIR ${CMAKE_SOURCE_DIR} CACHE STRING "name13" )
+    set(DEB_CPY_DIRS 
+        ${CMAKE_SOURCE_DIR}
+        CACHE STRING "dirs to copy"
+    )
 endif(${SRC_DIR} MATCHES "")
 
 message(STATUS " descr file = ${CPACK_PACKAGE_DESCRIPTION_FILE}")
