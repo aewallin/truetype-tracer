@@ -81,11 +81,7 @@ else( CPACK_DEBIAN_PACKAGE_SOURCE_COPY )
     )
     string( REPLACE "\n" "" GIT_COMMIT_ID ${GIT_COM_ID} )
     file(WRITE "${DEBIAN_SOURCE_ORIG_DIR}.orig/git-tag.txt" ${GIT_COMMIT_ID} )
-  
-  #execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/../.git "${DEBIAN_SOURCE_ORIG_DIR}.orig/.git")
-  #MESSAGE(STATUS "Removing .git from source-orig-dir. ")
-  #execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory "${DEBIAN_SOURCE_ORIG_DIR}.orig/.git")
-  #execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory "${DEBIAN_SOURCE_ORIG_DIR}.orig/.svn")
+
 endif( CPACK_DEBIAN_PACKAGE_SOURCE_COPY )
 
 # remove unnecessary folders

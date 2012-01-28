@@ -133,14 +133,14 @@ execute_process(
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-include(package_details.cmake)
+include(deb/package_details.cmake)
 
 # "make spackage" will build a source package
 add_custom_target(spackage 
               ${CMAKE_COMMAND} 
               -D SRC_DIR:STRING=${CMAKE_SOURCE_DIR} 
               -D MY_VERSION:STRING=${MY_VERSION} 
-              -C ${CMAKE_SOURCE_DIR}/package_details.cmake
+              -C ${CMAKE_SOURCE_DIR}/deb/package_details.cmake
               -P ${CMAKE_CURRENT_SOURCE_DIR}/deb/DebSourcePPA.cmake 
             ) 
             

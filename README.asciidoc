@@ -39,6 +39,7 @@ $ sudo make install
 .To-Do
 * Make it possible to change the font.
 * Auto-scale output to be of certain width/height.
+* Clean up the interface and API (now it's not very clear how to use ttt...)
 * DXF_Writer: Make DXF output work.
 * SVG output? (write a new class SVG_Writer)
 * NGC_Writer:
