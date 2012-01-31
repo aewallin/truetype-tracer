@@ -8,6 +8,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <vector>
+
 #include "extents.hpp"
 #include "p.hpp"
 #include "writer.hpp"
@@ -46,6 +48,8 @@ struct cout_redirect {
 private:
     std::streambuf * old;
 };
+
+
 
 // a class for the core ttt-algorithm
 // calls the FreeType library to get geometry, and then calls a Writer to produce output

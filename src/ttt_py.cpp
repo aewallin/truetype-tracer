@@ -52,8 +52,8 @@ static std::string ttt_with_writer(std::string str, Writer* wr) {
     if (str=="")
         str = "Hello world.";
     wr->set_text(str);
-    wr->set_font(TTFONT);
-    Ttt* ttt = new Ttt(wr, str, false, TTFONT);
+    //wr->set_font(TTFONT);
+    Ttt* ttt = new Ttt(wr, str, false, wr->get_font() );
     std::string outp = ttt->get_output();
     delete ttt;
     //delete wr;
@@ -86,6 +86,7 @@ BOOST_PYTHON_MODULE(ttt) {
         .add_property("cubic_biarc_subdivision", &Writer::get_cubic_biarc_subdiv, &Writer::set_cubic_biarc_subdiv)
         .add_property("cubic_line_subdivision", &Writer::get_cubic_line_subdiv, &Writer::set_cubic_line_subdiv)
         .add_property("extents", &Writer::get_extents)
+        .def("setFont", &Writer::set_font_number)
     ;
     bp::class_< NGC_Writer, bp::bases<Writer> >("NGC_Writer")
         .add_property("blockdelete", &NGC_Writer::get_blockdelete, &NGC_Writer::set_blockdelete)

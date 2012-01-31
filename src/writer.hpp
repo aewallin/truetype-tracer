@@ -1,6 +1,8 @@
 #pragma once
 
 #include "extents.hpp"
+#include "ttt_font.hpp"
+
 
 // this is a base-class for Writers.
 // Ttt calls this public interface, to produce output in various formats.
@@ -14,6 +16,7 @@ public:
         _cubic_biarc_subdiv = 200;
         _cubic_line_subdiv = 200;
         scale = 1;
+        ttfont = font_list[0]; // set the default font
     }
     virtual bool has_arc() const {return _arc;} 
     virtual bool has_arc(bool b) {_arc=b;}
@@ -32,6 +35,9 @@ public:
     
     void set_font(std::string f) {ttfont = f;}
     std::string get_font() const {return ttfont;}
+    void set_font_number(unsigned int i) {
+        ttfont = font_list[i];
+    }
     
     void set_text(std::string t) {text = t;}
     std::string get_text() const { return text; }
@@ -89,7 +95,7 @@ private:
     
     bool _arc; // true if Writer can ouput arcs. If false, arcs are output as lines.
     //double _arc_line_subdiv; // UNUSED!!
-    
+    ttt_font font_list;
     std::string ttfont;
     std::string text;
     double scale;
