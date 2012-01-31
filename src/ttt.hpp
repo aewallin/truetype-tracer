@@ -138,4 +138,6 @@ private:
     static Ttt* self;
     Writer* my_writer;
     std::stringstream buffer;
+    int previous_glyph_index;
+    bool previous;
 };

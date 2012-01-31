@@ -26,7 +26,9 @@ Ttt::Ttt(Writer* wr, std::string str, int unicode , std::string ttfont )
     self = this; // so that static methods work..
     int error;
     int linescale = 0;
-
+    previous = false; // no previous char, for kerning
+    previous_glyph_index = 0; // no index, for kerning
+    
     error = FT_Init_FreeType(&library);
     if(error) handle_ft_error("FT_Init_FreeType" , error, __LINE__);
 
@@ -40,7 +42,7 @@ Ttt::Ttt(Writer* wr, std::string str, int unicode , std::string ttfont )
     if (unicode) setlocale(LC_CTYPE, "");
 
     // this redirects to the buffer
-    cout_redirect redir( buffer.rdbuf() );
+    //cout_redirect redir( buffer.rdbuf() );
     
     int l = str.length();
     
@@ -70,27 +72,23 @@ long int Ttt::render_char(FT_Face face, wchar_t c, long int offset, int linescal
     int glyph_index;
     FT_Outline outline;
     FT_Outline_Funcs func_interface;
-    error = FT_Set_Pixel_Sizes(face, 4096, linescale ? linescale : 64);
-    if(error) handle_ft_error("FT_Set_Pixel_Sizes", error, __LINE__);
+
+    error = FT_Set_Pixel_Sizes(face, 4096, linescale ? linescale : 64); if(error) handle_ft_error("FT_Set_Pixel_Sizes", error, __LINE__);
     /* lookup glyph */
-    glyph_index = FT_Get_Char_Index(face, (FT_ULong)c);
-    if(!glyph_index) handle_ft_error("FT_Get_Char_Index", 0, __LINE__);
+    glyph_index = FT_Get_Char_Index(face, (FT_ULong)c); if(!glyph_index) handle_ft_error("FT_Get_Char_Index", 0, __LINE__);
+    
     /* load glyph */
-    error = FT_Load_Glyph(face, glyph_index, FT_LOAD_NO_BITMAP | FT_LOAD_NO_HINTING);
-    if(error) handle_ft_error("FT_Load_Glyph", error, __LINE__);
-    error = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_MONO);
-    if(error) handle_ft_error("FT_Render_Glyph", error, __LINE__);
-    if(linescale > 0)
+    error = FT_Load_Glyph(face, glyph_index, FT_LOAD_NO_BITMAP | FT_LOAD_NO_HINTING); if(error) handle_ft_error("FT_Load_Glyph", error, __LINE__);
+    error = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_MONO); if(error) handle_ft_error("FT_Render_Glyph", error, __LINE__);
+    
+    if(linescale > 0) // this is for the "zigzag" fill of letters?
         my_draw_bitmap(&face->glyph->bitmap, 
                        face->glyph->bitmap_left + offset,
                        face->glyph->bitmap_top,
                        linescale);
 
-    error = FT_Set_Pixel_Sizes(face, 0, 64);
-    if(error) handle_ft_error("FT_Set_Pixel_Sizes", error, __LINE__);
-    error = FT_Load_Glyph(face, glyph_index, FT_LOAD_NO_BITMAP |
-                                             FT_LOAD_NO_HINTING);
-    if(error) handle_ft_error("FT_Load_Glyph", error, __LINE__);
+    error = FT_Set_Pixel_Sizes(face, 0, 64); if(error) handle_ft_error("FT_Set_Pixel_Sizes", error, __LINE__);
+    error = FT_Load_Glyph(face, glyph_index, FT_LOAD_NO_BITMAP | FT_LOAD_NO_HINTING); if(error) handle_ft_error("FT_Load_Glyph", error, __LINE__);
 
     /* shortcut to the outline for our desired character */
     outline = face->glyph->outline;
@@ -107,13 +105,37 @@ long int Ttt::render_char(FT_Face face, wchar_t c, long int offset, int linescal
     FT_Outline_Translate( &outline, offset, 0L );
 
     /* plot the current character */
-    error = FT_Outline_Decompose( &outline, &func_interface, NULL);
-    if(error) handle_ft_error("FT_Outline_Decompose", error, __LINE__);
+    error = FT_Outline_Decompose( &outline, &func_interface, NULL);  if(error) handle_ft_error("FT_Outline_Decompose", error, __LINE__);
 
     /* save advance in a global */
     advance.x = face->glyph->advance.x;
     advance.y = face->glyph->advance.y;
-
+    
+    FT_Bool use_kerning = FT_HAS_KERNING( face );
+    std::cout << " not using kerning \n";
+    if ( use_kerning && previous ) {
+        FT_Vector kerning;
+        error = FT_Get_Kerning( face, // handle to face object  
+                                previous_glyph_index, // left glyph index  
+                                glyph_index, // right glyph index  
+                                FT_KERNING_DEFAULT, // kerning mode   FT_KERNING_DEFAULT , FT_KERNING_UNFITTED , FT_KERNING_UNSCALED
+                                &kerning ); // target vector
+        std::cout << " kerning x-advance: " << kerning.x << "\n";
+    }
+    /*
+    FT_Vector kerning; 
+    error = FT_Get_Kerning( face, // handle to face object  
+                            left, // left glyph index  
+                            right, // right glyph index  
+                            kerning_mode, // kerning mode   FT_KERNING_DEFAULT , FT_KERNING_UNFITTED , FT_KERNING_UNSCALED
+                            &kerning ); // target vector 
+    */
+    
+    // delete glyph with FT_Done_Glyph?
+    
+    previous = true; // we have a prev glyph, for kerning
+    previous_glyph_index = glyph_index; 
+    
     /* offset will get bumped up by the x size of the char just plotted */
     return face->glyph->advance.x;
 }
