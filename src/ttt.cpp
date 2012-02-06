@@ -111,6 +111,7 @@ long int Ttt::render_char(FT_Face face, wchar_t c, long int offset, int linescal
     advance.x = face->glyph->advance.x;
     advance.y = face->glyph->advance.y;
     
+    /*
     FT_Bool use_kerning = FT_HAS_KERNING( face );
     std::cout << " not using kerning \n";
     if ( use_kerning && previous ) {
@@ -122,6 +123,7 @@ long int Ttt::render_char(FT_Face face, wchar_t c, long int offset, int linescal
                                 &kerning ); // target vector
         std::cout << " kerning x-advance: " << kerning.x << "\n";
     }
+    */
     /*
     FT_Vector kerning; 
     error = FT_Get_Kerning( face, // handle to face object  
