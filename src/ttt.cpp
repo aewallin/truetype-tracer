@@ -42,7 +42,7 @@ Ttt::Ttt(Writer* wr, std::string str, int unicode , std::string ttfont )
     if (unicode) setlocale(LC_CTYPE, "");
 
     // this redirects to the buffer
-    //cout_redirect redir( buffer.rdbuf() );
+    cout_redirect redir( buffer.rdbuf() );
     
     int l = str.length();
     
