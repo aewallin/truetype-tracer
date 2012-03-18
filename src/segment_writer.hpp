@@ -24,37 +24,23 @@ public:
     virtual void move_to(P p) {
         
         if ( bp::len( seg ) != 0) {
-            seglist.append(seg); //std::cout << "(empty seg)\n";
-            seg = bp::list();
+            seglist.append(seg); 
+            seg = bp::list(); // empty seg
         }
         std::cout << "pen UP \n";
         std::cout << "  move to " << p.x << " , " << p.y << "\n";
         std::cout << "pen DOWN \n";
-        bp::list pt;
-        pt.append(get_scale()*p.x);
-        pt.append(get_scale()*p.y);
-        seg.append( pt );
-        last(p);
+        append_point(p);
     }
     
     virtual void line(P p) {
         std::cout << last_point.x << " , " << last_point.y << " line " <<p.x << " , " << p.y << "\n";
-        
-        //append_segment(last_point, p);
-        bp::list pt;
-        pt.append(get_scale()*p.x);
-        pt.append(get_scale()*p.y);
-        seg.append( pt );
-        last(p);
+        append_point(p);
     }
     //virtual void line_comment(P c1, P c2, P to) {}
     virtual void line_to(P p) {
         std::cout << last_point.x << " , " << last_point.y << " lineto " << p.x << " , " << p.y << "\n";
-        bp::list pt;
-        pt.append(get_scale()*p.x);
-        pt.append(get_scale()*p.y);
-        seg.append( pt );
-        last(p);
+        append_point(p);
     }
     
     virtual void cubic_comment(P c1, P c2, P to) {
@@ -87,12 +73,15 @@ public:
     }
     bp::list get_segments() { return seglist; }
 private:
-    void last(P p) {
+    void append_point(P p) {
+        bp::list pt;
+        pt.append(get_scale()*p.x);
+        pt.append(get_scale()*p.y);
+        seg.append( pt );
         last_point = p;
     }
 
     bp::list seglist;
     bp::list seg;
-
     P last_point;
 };
