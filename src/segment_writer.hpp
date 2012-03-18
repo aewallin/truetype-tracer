@@ -1,11 +1,15 @@
 #pragma once
 
-#include <boost/foreach.hpp>
+//#include <boost/foreach.hpp>
 
-#include <boost/python.hpp>
-namespace bp = boost::python;
+//#include <boost/python.hpp>
+//namespace bp = boost::python;
 #include "writer.hpp"
 
+typedef std::pair<double,double> Point;
+typedef std::vector<Point> Loop;
+typedef std::vector<Loop> Loops;
+    
 // this experimental writer outputs python lists with coordinates.
 // used for testing OpenVoronoi.
 class SEG_Writer : public Writer {
@@ -76,24 +80,9 @@ public:
         }
         std::cout << "(end glyph)\n";
     }
-    bp::list get_segments() {
-        bp::list out;
-        BOOST_FOREACH(Loop l, all_loops) {
-            bp::list pyloop;
-            BOOST_FOREACH(Point pt, l) {
-                bp::list pypt;
-                pypt.append(pt.first);
-                pypt.append(pt.second);
-                pyloop.append(pypt);
-            }
-            out.append(pyloop);
-        } 
-        return out; 
-    }
+    Loops get_loops() {return all_loops;}
 protected:
-    typedef std::pair<double,double> Point;
-    typedef std::vector<Point> Loop;
-    typedef std::vector<Loop> Loops;
+
     
     void append_point(P p) {
         Point pt;
@@ -103,10 +92,7 @@ protected:
         last_point = p;
     }
 
-    //std::vector< s
     Loop current_loop;
     Loops all_loops;
-    //bp::list seglist;
-    //bp::list seg;
     P last_point;
 };
