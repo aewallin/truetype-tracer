@@ -9,7 +9,7 @@
 
 // ttt example program
 int main() {
-    NGC_Writer my_writer;
+    NGC_Writer my_writer; // this Writer writes G-code
     Ttt t( &my_writer, "Test", false , TTFONT ); // ( Writer*, text, unicode?, path-to-font )
     
     std::string out = t.get_output();

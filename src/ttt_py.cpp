@@ -9,6 +9,7 @@ namespace bp = boost::python;
 #include "ngc_writer.hpp"
 #include "dxf_writer.hpp"
 #include "segment_writer.hpp"
+#include "segment_writer_py.hpp"
 #include "version_string.hpp"
 
 // this is the default font used if not specified on commandline
@@ -91,8 +92,9 @@ BOOST_PYTHON_MODULE(ttt) {
     bp::class_< NGC_Writer, bp::bases<Writer> >("NGC_Writer")
         .add_property("blockdelete", &NGC_Writer::get_blockdelete, &NGC_Writer::set_blockdelete)
     ;
-    bp::class_< SEG_Writer, bp::bases<Writer> >("SEG_Writer")
-        .def( "get_segments", &SEG_Writer::get_segments)
-    ;
+    bp::class_< PySEG_Writer, bp::bases<Writer> >("SEG_Writer")
+        .def( "get_loops", &PySEG_Writer::py_get_loops)
+        .def( "get_segments", &PySEG_Writer::py_get_loops) // for backwards compatibility. remove at some point!
+     ;
 
 }

@@ -46,10 +46,12 @@ set(TTT_SRC_FILES
 
 set(TTT_INCLUDE_FILES
     ttt.hpp
+    ttt_font.hpp
     p.hpp
     ngc_writer.hpp
-    extents.hpp
+    segment_writer.hpp
     dxf_writer.hpp
+    extents.hpp
     writer.hpp
 )
 

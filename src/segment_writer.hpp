@@ -1,5 +1,7 @@
 #pragma once
 
+#include <boost/foreach.hpp>
+
 #include <boost/python.hpp>
 namespace bp = boost::python;
 #include "writer.hpp"
@@ -22,10 +24,11 @@ public:
     
     virtual void move_comment(P p) {}
     virtual void move_to(P p) {
-        
-        if ( bp::len( seg ) != 0) {
-            seglist.append(seg); 
-            seg = bp::list(); // empty seg
+        if ( !current_loop.empty() ) {
+            //seglist.append(seg); 
+            all_loops.push_back(current_loop);
+            current_loop.clear();
+            //seg = bp::list(); // empty seg
         }
         std::cout << "pen UP \n";
         std::cout << "  move to " << p.x << " , " << p.y << "\n";
@@ -65,23 +68,45 @@ public:
             std::cout << "(start of symbol 0x"<< std::hex << wc << std::dec <<")\n"; 
     }
     virtual void end_glyph(extents glyph_extents, FT_Vector advance) {
-        if ( bp::len( seg ) != 0) {
-            seglist.append(seg); //std::cout << "(empty seg)\n";
-            seg = bp::list();
+        if ( !current_loop.empty() ) {
+            //seglist.append(seg); //std::cout << "(empty seg)\n";
+            all_loops.push_back(current_loop);
+            current_loop.clear();
+            //seg = bp::list();
         }
         std::cout << "(end glyph)\n";
     }
-    bp::list get_segments() { return seglist; }
-private:
+    bp::list get_segments() {
+        bp::list out;
+        BOOST_FOREACH(Loop l, all_loops) {
+            bp::list pyloop;
+            BOOST_FOREACH(Point pt, l) {
+                bp::list pypt;
+                pypt.append(pt.first);
+                pypt.append(pt.second);
+                pyloop.append(pypt);
+            }
+            out.append(pyloop);
+        } 
+        return out; 
+    }
+protected:
+    typedef std::pair<double,double> Point;
+    typedef std::vector<Point> Loop;
+    typedef std::vector<Loop> Loops;
+    
     void append_point(P p) {
-        bp::list pt;
-        pt.append(get_scale()*p.x);
-        pt.append(get_scale()*p.y);
-        seg.append( pt );
+        Point pt;
+        pt.first  = get_scale()*p.x;
+        pt.second = get_scale()*p.y;
+        current_loop.push_back(pt);
         last_point = p;
     }
 
-    bp::list seglist;
-    bp::list seg;
+    //std::vector< s
+    Loop current_loop;
+    Loops all_loops;
+    //bp::list seglist;
+    //bp::list seg;
     P last_point;
 };
