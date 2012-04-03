@@ -36,6 +36,9 @@ $ make
 $ sudo make install
 ----
 
+.See Also
+http://ttfquery.sourceforge.net/
+
 .To-Do
 * Make it possible to change the font.
 * Auto-scale output to be of certain width/height.
