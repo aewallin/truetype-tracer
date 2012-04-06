@@ -1,12 +1,20 @@
 #pragma once
 
-//#include <boost/foreach.hpp>
-
-//#include <boost/python.hpp>
-//namespace bp = boost::python;
 #include "writer.hpp"
 
-typedef std::pair<double,double> Point;
+//typedef std::pair<double,double> Point; // x, y, r, cw
+struct Point {
+    Point(double _x, double _y) : x(_x), y(_y), r(-1), cw(true) {}
+    Point(double _x, double _y, double _r, bool _cw, double _cx, double _cy) : 
+     x(_x), y(_y), r(_r), cw(_cw), cx(_cx), cy(_cy) {}
+    double x;
+    double y;
+    double r;
+    bool cw;
+    double cx;
+    double cy;
+};
+
 typedef std::vector<Point> Loop;
 typedef std::vector<Loop> Loops;
     
@@ -63,7 +71,9 @@ public:
     }
     //virtual void conic_to(P to, P diff) {}
     //virtual void arc_small_den(P p) {} // dxf_writer lacks this functn!
-    //virtual void arc(P p2, double r, double gr, double bulge) {} 
+    virtual void arc(P p2, double r, P c, double gr, double bulge) {
+        append_arc(p2,r,c);
+    } 
     
     virtual void start_glyph(const char* s, wchar_t wc, long int offset) {
         if(isalnum(*s))
@@ -73,21 +83,22 @@ public:
     }
     virtual void end_glyph(extents glyph_extents, FT_Vector advance) {
         if ( !current_loop.empty() ) {
-            //seglist.append(seg); //std::cout << "(empty seg)\n";
             all_loops.push_back(current_loop);
             current_loop.clear();
-            //seg = bp::list();
         }
         std::cout << "(end glyph)\n";
     }
     Loops get_loops() {return all_loops;}
 protected:
+    void append_arc(P p,double r, P c) {
+        Point pt(get_scale()*p.x, get_scale()*p.y, get_scale()*r, (r<0), get_scale()*c.x, get_scale()*c.y  );
+        current_loop.push_back(pt);
+        last_point = p;
+    }
 
-    
+
     void append_point(P p) {
-        Point pt;
-        pt.first  = get_scale()*p.x;
-        pt.second = get_scale()*p.y;
+        Point pt(get_scale()*p.x, get_scale()*p.y);
         current_loop.push_back(pt);
         last_point = p;
     }

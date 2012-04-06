@@ -77,7 +77,7 @@ public:
     void set_conic_line_subdiv(double s) {_conic_line_subdiv=s;}
     
     virtual void arc_small_den(P p) {} // dxf_writer lacks this functn!
-    virtual void arc(P p2, double r, double gr, double bulge) {}
+    virtual void arc(P p2, double r, P c, double gr, double bulge) {}
     //double get_arc_line_subdiv() const {return _arc_line_subdiv;}
     //void set_arc_line_subdiv(double s) {_arc_line_subdiv=s;}
     

@@ -423,7 +423,7 @@ void Ttt::arc(P p1, P p2, P d) {
     }
 
     double r = - p.dot(p)/den; // radius
-    double i =  d.y*r;
+    double i =  d.y*r; // vector to center
     double j = -d.x*r;
 
     P c(p1.x+i, p1.y+j ); // center
@@ -440,7 +440,7 @@ void Ttt::arc(P p1, P p2, P d) {
     double bulge = tan(fabs(en-st)/4);
     if(r > 0) bulge = -bulge; // used for DXF
     double gr = ((en - st) < M_PI) ? fabs(r) : -fabs(r); // gr used for NGC
-    my_writer->arc(p2, r, gr, bulge);
+    my_writer->arc(p2, r, c, gr, bulge);
 }
 
 // output a biarc

@@ -120,7 +120,7 @@ public:
     virtual void arc_small_den(P p2) {
         std::cout << "G1 X["<< p2.x <<"*#3+#5] Y["<< p2.y<<"%.4f*#3+#6]\n"; //, p2.x, p2.y);
     }
-    virtual void arc(P p2, double r, double gr, double bulge) {
+    virtual void arc(P p2, double r, P c, double gr, double bulge) {
         if(r < 0)
             std::cout << "G3 X[" << p2.x << "*#3+#5] Y["<< p2.y  << "*#3+#6] R["<< gr <<"*#3]\n";
         else

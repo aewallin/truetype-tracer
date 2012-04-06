@@ -18,8 +18,10 @@ public:
             bp::list pyloop;
             BOOST_FOREACH(Point pt, l) {
                 bp::list pypt;
-                pypt.append(pt.first);
-                pypt.append(pt.second);
+                pypt.append(pt.x);
+                pypt.append(pt.y);
+                pypt.append(pt.r);
+                pypt.append(pt.cw);
                 pyloop.append(pypt);
             }
             out.append(pyloop);
