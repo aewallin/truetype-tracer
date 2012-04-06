@@ -39,11 +39,7 @@ public:
     virtual void cubic_to(P ctrl1, P ctrl2, P to ) {
         //
     }
-    virtual void arc() {
-        //     printf("  42\n%.4f\n  70\n1\n"
-        //  "  0\nVERTEX\n  8\n0\n  10\n%.4f\n  20\n%.4f\n  30\n0.0\n",
-        //  bulge, p2.x, p2.y);
-    }
+    virtual void arc(P p2, double r, P c, double gr, double bulge) {}
 private:
 
 };

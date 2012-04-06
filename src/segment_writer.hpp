@@ -4,7 +4,8 @@
 
 //typedef std::pair<double,double> Point; // x, y, r, cw
 struct Point {
-    Point(double _x, double _y) : x(_x), y(_y), r(-1), cw(true) {}
+    Point(double _x, double _y) : 
+     x(_x), y(_y), r(-1), cw(true), cx(0), cy(0) {}
     Point(double _x, double _y, double _r, bool _cw, double _cx, double _cy) : 
      x(_x), y(_y), r(_r), cw(_cw), cx(_cx), cy(_cy) {}
     double x;
@@ -91,7 +92,7 @@ public:
     Loops get_loops() {return all_loops;}
 protected:
     void append_arc(P p,double r, P c) {
-        Point pt(get_scale()*p.x, get_scale()*p.y, get_scale()*r, (r<0), get_scale()*c.x, get_scale()*c.y  );
+        Point pt(get_scale()*p.x, get_scale()*p.y, get_scale()*fabs(r), !(r<0), get_scale()*c.x, get_scale()*c.y  );
         current_loop.push_back(pt);
         last_point = p;
     }

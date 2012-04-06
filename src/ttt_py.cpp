@@ -77,7 +77,7 @@ BOOST_PYTHON_MODULE(ttt) {
         .add_property("maxy", &extents::maxy)
         .add_property("maxx", &extents::maxx)
     ;
-    bp::class_<Writer>("Writer")
+    bp::class_<Writer, boost::noncopyable>("Writer", bp::no_init) // has pure virtual fnctions 
         .add_property("arc", &Writer::get_arc, &Writer::set_arc)
         .add_property("conic", &Writer::get_conic, &Writer::set_conic)
         .add_property("cubic", &Writer::get_cubic, &Writer::set_cubic)

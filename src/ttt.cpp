@@ -357,7 +357,7 @@ int Ttt::my_cubic_as_biarcs(const FT_Vector* control1,
     // define the subdivision of curves into arcs: approximate curve length
     // in font coordinates to get one arc pair (minimum of two arc pairs
     // per curve)
-    double dsteps=my_writer->get_cubic_biarc_subdiv(); // FIXME: get this from Writer!?
+    double dsteps=my_writer->get_cubic_biarc_subdiv();
 
     int steps = (int) std::max( (double)2, len/dsteps); // at least two steps
 

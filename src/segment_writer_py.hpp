@@ -22,6 +22,8 @@ public:
                 pypt.append(pt.y);
                 pypt.append(pt.r);
                 pypt.append(pt.cw);
+                pypt.append(pt.cx);
+                pypt.append(pt.cy);
                 pyloop.append(pypt);
             }
             out.append(pyloop);
