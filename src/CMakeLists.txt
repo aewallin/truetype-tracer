@@ -75,13 +75,13 @@ execute_process(
     COMMAND python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(0,0,\"/usr/local\")"
     OUTPUT_VARIABLE Python_site_packages
     OUTPUT_STRIP_TRAILING_WHITESPACE
-) # on Ubuntu 11.10 this outputs: /usr/local/lib/python2.7/dist-packages
-
+) 
+MESSAGE(STATUS "Python module will be installed to: " ${Python_site_packages})    
+# on Ubuntu 11.10 this outputs: /usr/local/lib/python2.7/dist-packages
 
 # strip away /usr/local/  because that is what CMAKE_INSTALL_PREFIX is set to
 # also, since there is no leading "/", it makes ${Python_site_packages} a relative path.
 STRING(REGEX REPLACE "/usr/local/(.*)$" "\\1" Python_site_packages "${Python_site_packages}" )
-
 MESSAGE(STATUS "CMAKE_INSTALL_PREFIX is : " ${CMAKE_INSTALL_PREFIX})
 MESSAGE(STATUS "Python libraries will be installed to: " ${Python_site_packages})
 
@@ -118,15 +118,6 @@ install(
 )
 
 ########################################################################
-# install readme and example(s)
-# 'other' documentation files
-#set(DOC_FILES ${CMAKE_SOURCE_DIR}/../README.asciidoc ${CMAKE_SOURCE_DIR}/../LICENSE.txt)
-#set(DOC_PATH "share/doc/ttt")
-#install(FILES ${DOC_FILES}
-#        DESTINATION ${DOC_PATH}
-#)
-
-########################################################################
 # "make package" stuff
  
 execute_process(
@@ -134,7 +125,7 @@ execute_process(
     OUTPUT_VARIABLE DEB_ARCHITECTURE
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
-
+MESSAGE(STATUS "DEB_ARCHITECTURE is: " ${DEB_ARCHITECTURE})
 include(deb/package_details.cmake)
 
 # "make spackage" will build a source package
