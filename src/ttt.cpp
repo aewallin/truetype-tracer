@@ -266,8 +266,8 @@ int Ttt::my_conic_as_biarcs( const FT_Vector* control, const FT_Vector* to, void
     P q1=p2 - p1;
     P ps=p0;
     P ts=q0;
-    for(int t=1; t<=steps; t++) {
-        double tf = (double)t/(double)steps;
+    for(int ti=1; ti<=steps; ti++) {
+        double tf = (double)ti/(double)steps;
         double t1 = 1-tf;
         P p = p0*SQ(t1) + p1*(2*tf*t1) + p2*SQ(tf);
         P t = q0*(t1) + q1*(tf); 
@@ -370,8 +370,8 @@ int Ttt::my_cubic_as_biarcs(const FT_Vector* control1,
     P q2=p3-p2;
     P ps=p0;
     P ts=q0;
-    for(int t=1; t<=steps; t++) {
-        double tf = t*1.0/steps;
+    for(int ti=1; ti<=steps; ti++) {
+        double tf = ti*1.0/steps;
         double t1 = 1-tf;
         P p = p0*CUBE(t1) + p1*3*tf*SQ(t1) + p2*3*SQ(tf)*t1 + p3*CUBE(tf) ;
         P t = q0*SQ(t1) + q1*2*tf*t1 + q2*SQ(tf);
