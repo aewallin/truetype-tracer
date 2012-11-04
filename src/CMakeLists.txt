@@ -136,6 +136,12 @@ add_custom_target(spackage
               -C ${CMAKE_SOURCE_DIR}/deb/package_details.cmake
               -P ${CMAKE_CURRENT_SOURCE_DIR}/deb/DebSourcePPA.cmake 
             ) 
-            
+
+MESSAGE(STATUS " 'make' builds the c++ library and the python module" )
+MESSAGE(STATUS " 'make libttt' builds only the c++ library" )
+MESSAGE(STATUS " 'make package' builds a binary DEB package" )
+MESSAGE(STATUS " 'make spackage' builds a source DEB package" )
+
+   
 # "make package" builds a binary debian package
 include(CPack) # this should be last
