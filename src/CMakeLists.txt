@@ -141,7 +141,7 @@ MESSAGE(STATUS " 'make' builds the c++ library and the python module" )
 MESSAGE(STATUS " 'make libttt' builds only the c++ library" )
 MESSAGE(STATUS " 'make package' builds a binary DEB package" )
 MESSAGE(STATUS " 'make spackage' builds a source DEB package" )
-
+MESSAGE(STATUS " 'make install' installs" )
    
 # "make package" builds a binary debian package
 include(CPack) # this should be last
