@@ -1,6 +1,6 @@
 
 message(STATUS "package_details.cmake called with SRC_DIR is = " ${SRC_DIR})
-message(STATUS "package_details.cmake  called with version  = " ${MY_VERSION})
+message(STATUS "package_details.cmake called with version  = " ${MY_VERSION})
 
 set(CPACK_GENERATOR "DEB" CACHE string "generator" )
 set(CPACK_PACKAGE_CONTACT "Anders Wallin <anders.e.e.wallin@gmail.com>" CACHE STRING "email")
@@ -40,7 +40,7 @@ SET(CPACK_PACKAGE_VERSION ${MY_VERSION} CACHE STRING "name8")
 set(CPACK_DEBIAN_DISTRIBUTION_NAME ubuntu CACHE STRING "name9")
 set(CPACK_DEBIAN_DISTRIBUTION_RELEASES lucid maverick natty oneiric precise quantal CACHE STRING "name10") 
 #set(CPACK_DEBIAN_DISTRIBUTION_RELEASES oneiric CACHE STRING "name10") 
-message(STATUS "package_details.cmake  CMAKE_SOURCE_DIR is = " ${CMAKE_SOURCE_DIR})
+message(STATUS "package_details.cmake CMAKE_SOURCE_DIR is = " ${CMAKE_SOURCE_DIR})
 if(${SRC_DIR} MATCHES "")
     set(CPACK_PACKAGE_DESCRIPTION_FILE ${SRC_DIR}/deb/debian_package_description.txt CACHE STRING "package description file")
     set(CPACK_RESOURCE_FILE_LICENSE ${SRC_DIR}/deb/debian_copyright.txt CACHE STRING "name11")
@@ -61,6 +61,6 @@ else(${SRC_DIR} MATCHES "")
     )
 endif(${SRC_DIR} MATCHES "")
 
-message(STATUS " descr file = ${CPACK_PACKAGE_DESCRIPTION_FILE}")
+message(STATUS "package_details.cmake descr file = ${CPACK_PACKAGE_DESCRIPTION_FILE}")
 
 set(CPACK_DEBIAN_CHANGELOG "  * Latest development version." CACHE STRING "name12")
