@@ -16,12 +16,12 @@ endif()
 
 
 find_library(TTT_LIBRARY REQUIRED
-            NAMES ttt libttt
-            PATHS /usr/local/lib/ttt /usr/local/lib
+            NAMES truetypetracer
+            PATHS /usr/local/lib/truetypetracer /usr/local/lib
             DOC "ttt"
 )
 MESSAGE(STATUS "TTT_LIBRARY is: " ${TTT_LIBRARY})
-include_directories( /usr/local/include/ttt )
+include_directories( /usr/local/include/truetypetracer )
 
 find_package(Freetype REQUIRED)
 if( FREETYPE_FOUND )

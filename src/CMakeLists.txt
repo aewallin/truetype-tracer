@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
  
-Project(ttt)
+Project(truetypetracer)
  
 # this figures out the Python include directories and adds them to the
 # header file search path
@@ -58,15 +58,15 @@ set(TTT_INCLUDE_FILES
 ########################################################################
 # this makes the Python module
 add_library(
-    ttt
+    truetypetracer
     MODULE
     ${TTT_SRC_FILES}
     ttt_py.cpp # the boost-python bindings are here.
 )
 
-set_target_properties(ttt PROPERTIES PREFIX "") 
-set_target_properties(ttt PROPERTIES VERSION ${MY_VERSION}) 
-target_link_libraries(ttt ${Boost_LIBRARIES} ${FREETYPE_LIBRARY}) 
+set_target_properties(truetypetracer PROPERTIES PREFIX "") 
+set_target_properties(truetypetracer PROPERTIES VERSION ${MY_VERSION}) 
+target_link_libraries(truetypetracer ${Boost_LIBRARIES} ${FREETYPE_LIBRARY}) 
 
 #
 # this figures out where to install the Python modules
@@ -87,33 +87,33 @@ MESSAGE(STATUS "Python libraries will be installed to: " ${Python_site_packages}
 
 # this installs the python library
 install(
-    TARGETS ttt
+    TARGETS truetypetracer
     LIBRARY DESTINATION ${Python_site_packages}
 )
 
 ########################################################################
 # the c++ shared library
 add_library(
-    libttt
+    libtruetypetracer
     SHARED
     ${TTT_SRC_FILES}
 )
-set_target_properties(libttt PROPERTIES PREFIX "") 
-set_target_properties(libttt PROPERTIES VERSION ${MY_VERSION}) 
-target_link_libraries(libttt ${FREETYPE_LIBRARY}) # no need to link with boost-python here.
+set_target_properties(libtruetypetracer PROPERTIES PREFIX "") 
+set_target_properties(libtruetypetracer PROPERTIES VERSION ${MY_VERSION}) 
+target_link_libraries(libtruetypetracer ${FREETYPE_LIBRARY}) # no need to link with boost-python here.
 
 install(
-    TARGETS libttt
+    TARGETS libtruetypetracer
     LIBRARY 
-    DESTINATION lib/ttt
-    ARCHIVE DESTINATION lib/ttt
+    DESTINATION lib/truetypetracer
+    ARCHIVE DESTINATION lib/truetypetracer
     PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
 
 # this installs the c++ include headers
 install(
     FILES ${TTT_INCLUDE_FILES}
-    DESTINATION include/ttt
+    DESTINATION include/truetypetracer
     PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
 )
 
@@ -138,7 +138,7 @@ add_custom_target(spackage
             ) 
 
 MESSAGE(STATUS " 'make' builds the c++ library and the python module" )
-MESSAGE(STATUS " 'make libttt' builds only the c++ library" )
+MESSAGE(STATUS " 'make libtruetypetracer' builds only the c++ library" )
 MESSAGE(STATUS " 'make package' builds a binary DEB package" )
 MESSAGE(STATUS " 'make spackage' builds a source DEB package" )
 MESSAGE(STATUS " 'make install' installs" )

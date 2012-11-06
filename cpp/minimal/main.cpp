@@ -2,8 +2,8 @@
 #include <string>
 #include <iostream>
 
-#include <ttt/ttt.hpp>
-#include <ttt/ngc_writer.hpp>
+#include <truetypetracer/ttt.hpp>
+#include <truetypetracer/ngc_writer.hpp>
 
 #define TTFONT "/usr/share/fonts/truetype/freefont/FreeSerif.ttf"
 

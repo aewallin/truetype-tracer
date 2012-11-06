@@ -4,8 +4,8 @@
 
 #include <boost/foreach.hpp>
 
-#include <ttt/ttt.hpp>
-#include <ttt/segment_writer.hpp>
+#include <truetypetracer/ttt.hpp>
+#include <truetypetracer/segment_writer.hpp>
 
 #define TTFONT "/usr/share/fonts/truetype/freefont/FreeSerif.ttf"
 
@@ -22,7 +22,7 @@ int main() {
         std::cout << "Loop " << nloop << "\n";
         int npoint=0;
         BOOST_FOREACH(Point pt, l) {
-            std::cout << " Point " << npoint << " x= " << pt.first << " y= " << pt.second << "\n";
+            std::cout << " Point " << npoint << " x= " << pt.x << " y= " << pt.y << "\n";
             npoint++;
         }
         std::cout << "End Loop " << nloop << "\n";

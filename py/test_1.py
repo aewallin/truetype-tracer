@@ -1,5 +1,4 @@
-import ttt
-
+import truetypetracer as ttt
 t1 = ttt.ngc()
 t = ttt.ngc("abc")
 print t

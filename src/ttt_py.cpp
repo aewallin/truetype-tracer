@@ -61,7 +61,7 @@ static std::string ttt_with_writer(std::string str, Writer* wr) {
     return outp;
 }
  
-BOOST_PYTHON_MODULE(ttt) {
+BOOST_PYTHON_MODULE(truetypetracer) {
 
     bp::def("version", version);
     bp::def("ngc", ngc0); // zero arguments. "hello world" with all else defaults

@@ -19,7 +19,8 @@ set(DEBSRC_BUILD_DEPENDS debhelper python libboost-dev libboost-python-dev libfr
 # natty/maverick has 1.42.0
 # lucid has 1.40.0
 set(DEBSRC_PACKAGE_DEPENDS python git cmake 
-                "libboost-python1.49.0 | libboost-python1.48.0 | libboost-python1.46.1 | libboost-python1.42.0 | libboost-python1.40.0"
+                #"libboost-python1.49.0 | libboost-python1.48.0 | libboost-python1.46.1 | libboost-python1.42.0 | libboost-python1.40.0"
+                libboost-python
                 libfreetype6 CACHE STRING "name")
 
 # however CPack wants dependencies as a single comma separated string!

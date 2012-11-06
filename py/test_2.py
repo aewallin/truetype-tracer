@@ -1,4 +1,4 @@
-import ttt
+import truetypetracer as ttt
 
 #wr = ttt.NGC_Writer()
 wr = ttt.SEG_Writer()
