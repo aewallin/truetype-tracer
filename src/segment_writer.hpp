@@ -2,7 +2,7 @@
 
 #include "writer.hpp"
 
-//typedef std::pair<double,double> Point; // x, y, r, cw
+// these are the segments we output
 struct Point {
     Point(double _x, double _y) : 
      x(_x), y(_y), r(-1), cw(true), cx(0), cy(0) {}
@@ -18,7 +18,7 @@ struct Point {
 
 typedef std::vector<Point> Loop;
 typedef std::vector<Loop> Loops;
-    
+
 // this experimental writer outputs python lists with coordinates.
 // used for testing OpenVoronoi.
 class SEG_Writer : public Writer {
@@ -38,10 +38,8 @@ public:
     virtual void move_comment(P p) {}
     virtual void move_to(P p) {
         if ( !current_loop.empty() ) {
-            //seglist.append(seg); 
             all_loops.push_back(current_loop);
             current_loop.clear();
-            //seg = bp::list(); // empty seg
         }
         std::cout << "pen UP \n";
         std::cout << "  move to " << p.x << " , " << p.y << "\n";
@@ -91,13 +89,14 @@ public:
     }
     Loops get_loops() {return all_loops;}
 protected:
+    // adds an arc segment to the output
     void append_arc(P p,double r, P c) {
         Point pt(get_scale()*p.x, get_scale()*p.y, get_scale()*fabs(r), !(r<0), get_scale()*c.x, get_scale()*c.y  );
         current_loop.push_back(pt);
         last_point = p;
     }
 
-
+    // adds a linear segment to the output
     void append_point(P p) {
         Point pt(get_scale()*p.x, get_scale()*p.y);
         current_loop.push_back(pt);
