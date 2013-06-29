@@ -26,13 +26,13 @@ public:
             printf("  0\nSEQEND\n");
         bootstrap=0;
         printf("  0\nPOLYLINE\n  8\n0\n 66\n     1\n 10\n0.0\n 20\n0.0\n 30\n0.0\n");
-        printf("  0\nVERTEX\n  8\n0\n 10\n%ld.000\n 20\n%ld.000\n 30\n0.0\n", p.x, p.y);
+        printf("  0\nVERTEX\n  8\n0\n 10\n%f.000\n 20\n%f.000\n 30\n0.0\n", p.x, p.y);
     }
     virtual void line(P p) {
         printf("  0\nVERTEX\n  8\n0\n 10\n%.4f\n 20\n%.4f\n 30\n0.0\n", p.x, p.y);
     }
-    virtual void line_to(P p) { // why long-double here?
-        printf("  0\nVERTEX\n  8\n0\n 10\n%ld.000\n 20\n%ld.000\n 30\n0.0\n", p.x,p.y);
+    virtual void line_to(P p) {
+        printf("  0\nVERTEX\n  8\n0\n 10\n%f.000\n 20\n%f.000\n 30\n0.0\n", p.x,p.y);
     }
     virtual void conic_to(P to, P diff ) {
         //
