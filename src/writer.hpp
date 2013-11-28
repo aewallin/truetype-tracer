@@ -38,6 +38,9 @@ public:
     void set_font_number(unsigned int i) {
         ttfont = font_list[i];
     }
+    void set_font_path(std::string path) {
+        ttfont = path;
+    }
     
     void set_text(std::string t) {text = t;}
     std::string get_text() const { return text; }
