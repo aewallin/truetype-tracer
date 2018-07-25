@@ -12,8 +12,9 @@ print s3
 s = wr.get_segments()
 print s
 e = wr.extents
+print "number of segments ",len(s)
 print e
-print e.maxx
-print e.minx
-print e.maxy
-print e.miny
+print "extents max x",e.maxx
+print "extents min x",e.minx
+print "extents max y",e.maxy
+print "extents min y",e.miny
