@@ -5,12 +5,14 @@ Project(truetypetracer)
 # this figures out the Python include directories and adds them to the
 # header file search path
 execute_process(
-    COMMAND python-config --includes
+    COMMAND python3-config --includes
     COMMAND sed -r "s/-I//g; s/ +/;/g"
     COMMAND tr -d '\n'
     OUTPUT_VARIABLE Python_Includes
 )
 include_directories(${Python_Includes})
+MESSAGE(STATUS "Python_Includes: " ${Python_Includes})
+
 
 find_package( Boost COMPONENTS python REQUIRED)
 if(Boost_FOUND)
@@ -19,7 +21,7 @@ if(Boost_FOUND)
     MESSAGE(STATUS "Boost_INCLUDE_DIRS are: " ${Boost_INCLUDE_DIRS})
     MESSAGE(STATUS "Boost_PYTHON_LIBRARY is: " ${Boost_PYTHON_LIBRARY})
     MESSAGE(STATUS "boost_LIBRARY_DIRS is: " ${Boost_LIBRARY_DIRS})
-    MESSAGE(STATUS "Boost_LIBRARIES is: " ${Boost_LIBRARIES})    
+    MESSAGE(STATUS "Boost_LIBRARIES is: " ${Boost_LIBRARIES})
 endif()
 
 find_package(Freetype REQUIRED)
@@ -72,7 +74,7 @@ target_link_libraries(truetypetracer ${Boost_LIBRARIES} ${FREETYPE_LIBRARY})
 # this figures out where to install the Python modules
 #
 execute_process(
-    COMMAND python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(0,0,\"/usr/local\")"
+    COMMAND python -c "from distutils.sysconfig import get_python_lib; print( get_python_lib(0,0,\"/usr/local\") )"
     OUTPUT_VARIABLE Python_site_packages
     OUTPUT_STRIP_TRAILING_WHITESPACE
 ) 
