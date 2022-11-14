@@ -1,9 +1,8 @@
+![Build-badge](https://github.com/aewallin/truetype-tracer/actions/workflows/cmake-build.yml/badge.svg)
+
 True-type tracer
 ================
-// see http://powerman.name/doc/asciidoc
 
-// True-type tracer
-// ----------------
 
 Experimental C++ port, with python bindings, of True-type tracer, 
 forked from Chris Radek's site at http://timeguy.com/cradek/01276453959
@@ -17,29 +16,21 @@ Uses http://www.freetype.org/index2.html[FreeType] to produce font-outline geome
 Dependencies: git, cmake, FreeType, boost-python.
 
 
+Installation from source
 
-.Installation from PPA
-----
-$ sudo add-apt-repository ppa:anders-e-e-wallin/cam
-$ sudo apt-get update
-$ sudo apt-get install truetypetracer
-----
+    $ git clone https://aewallin@github.com/aewallin/truetype-tracer.git
+    $ cd truetype-tracer
+    $ mkdir build
+    $ cd build
+    $ cmake ../src
+    $ make
+    $ sudo make install
 
-.Installation from source
-----
-$ git clone https://aewallin@github.com/aewallin/truetype-tracer.git
-$ cd truetype-tracer
-$ mkdir build
-$ cd build
-$ cmake ../src
-$ make
-$ sudo make install
-----
-
-.See Also
+See Also
 http://ttfquery.sourceforge.net/
 
-.To-Do
+To-Do
+
 * Make it possible to change the font.
 * Auto-scale output to be of certain width/height.
 * Clean up the interface and API (now it's not very clear how to use ttt...)
