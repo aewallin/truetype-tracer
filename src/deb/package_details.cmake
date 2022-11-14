@@ -2,7 +2,7 @@
 message(STATUS "package_details.cmake called with SRC_DIR is = " ${SRC_DIR})
 message(STATUS "package_details.cmake called with version  = " ${MY_VERSION})
 
-set(CPACK_GENERATOR "DEB" CACHE string "generator" )
+set(CPACK_GENERATOR "DEB" CACHE STRING "generator" )
 set(CPACK_PACKAGE_CONTACT "Anders Wallin <anders.e.e.wallin@gmail.com>" CACHE STRING "email")
 set(CPACK_PACKAGE_NAME "truetypetracer" CACHE STRING "name")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "C++ port with python bindings of true-type-tracer" CACHE STRING "name2")
